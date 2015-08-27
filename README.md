@@ -1,6 +1,6 @@
 # Capsule Daemon
 
-A [caplet](https://github.com/puniverse/capsule#what-are-caplets) that wraps a [capsule](https://github.com/puniverse/capsule) wrapped as an Unix [jsvc](http://commons.apache.org/proper/commons-daemon/jsvc.html) service.
+A [caplet](https://github.com/puniverse/capsule#what-are-caplets) that wraps and runs a [capsule](https://github.com/puniverse/capsule) in a Unix service through [jsvc](http://commons.apache.org/proper/commons-daemon/jsvc.html).
 
 TODO procrun
 
