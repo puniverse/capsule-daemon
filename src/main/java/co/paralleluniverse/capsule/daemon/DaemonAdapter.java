@@ -18,50 +18,52 @@ import java.util.Arrays;
  */
 public class DaemonAdapter {
 
-	public static final String PROP_INIT = "capsule.daemon.init";
-	public static final String PROP_START = "capsule.daemon.start";
-	public static final String PROP_STOP = "capsule.daemon.stop";
-	public static final String PROP_DESTROY = "capsule.daemon.destroy";
+	public static final String PROP_INIT_CLASS = "capsule.daemon.initClass";
+	public static final String PROP_INIT_METHOD = "capsule.daemon.initMethod";
+	public static final String PROP_START_CLASS = "capsule.daemon.startClass";
+	public static final String PROP_START_METHOD = "capsule.daemon.startMethod";
+	public static final String PROP_STOP_CLASS = "capsule.daemon.stopClass";
+	public static final String PROP_STOP_METHOD = "capsule.daemon.stopMethod";
+	public static final String PROP_DESTROY_CLASS = "capsule.daemon.destroyClass";
+	public static final String PROP_DESTROY_METHOD = "capsule.daemon.destroyMethod";
 
 	private static String[] mainArgs;
 
 	public static void init(String args[]) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException {
-		mainArgs = (String[]) i(p(PROP_INIT), args);
+		mainArgs = (String[]) i(p(PROP_INIT_CLASS), p(PROP_INIT_METHOD), args);
 	}
 	public static void start() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException {
-		i(p(PROP_START), new Object[] { mainArgs }, STRING_ARRAY_ARG_TYPES);
+		i(p(PROP_START_CLASS), p(PROP_START_METHOD), new Object[] { mainArgs }, STRING_ARRAY_ARG_TYPES);
 	}
 	public static void stop() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException {
-		i(p(PROP_STOP));
+		i(p(PROP_STOP_CLASS), p(PROP_STOP_METHOD));
 	}
 	public static void destroy() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException {
-		i(p(PROP_DESTROY));
+		i(p(PROP_DESTROY_CLASS), p(PROP_DESTROY_METHOD));
 	}
 
 	private static String p(String s) {
 		return System.getProperty(s);
 	}
 
-	private static Object i(String methodSpec, Object o, Object[] args, Class[] argTypes) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException {
-		if (methodSpec != null)
-			return m(methodSpec, argTypes).invoke(o, args);
+	private static Object i(String className, String methodName, Object o, Object[] args, Class[] argTypes) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException {
+		if (className != null && methodName != null)
+			return m(className, methodName, argTypes).invoke(o, args);
 		return null;
 	}
-	private static Object i(String methodSpec) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException {
-		return i(methodSpec, null, null, null);
+	private static Object i(String className, String methodName) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException {
+		return i(className, methodName, null, null, null);
 	}
 	private static final Class[] STRING_ARRAY_ARG_TYPES = new Class[]{String[].class};
-	private static Object i(String methodSpec, String[] args) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException {
-		return i(methodSpec, args, args != null ? STRING_ARRAY_ARG_TYPES : null);
+	private static Object i(String className, String methodName, String[] args) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException {
+		return i(className, methodName, args, args != null ? STRING_ARRAY_ARG_TYPES : null);
 	}
-	private static Object i(String methodSpec, Object[] args, Class[] types) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException {
-		return i(methodSpec, null, args, types);
+	private static Object i(String className, String methodName, Object[] args, Class[] types) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException {
+		return i(className, methodName, null, args, types);
 	}
 
-	private static Method m(String methodSpec, Class[] types) throws ClassNotFoundException, NoSuchMethodException {
-		System.out.println("Method: " + methodSpec + "(" + Arrays.toString(types) + ")");
-		final String c = methodSpec.substring(0, methodSpec.lastIndexOf('.'));
-		final String m = methodSpec.substring(methodSpec.lastIndexOf('.') + 1);
-		return DaemonAdapter.class.getClassLoader().loadClass(c).getMethod(m, types);
+	private static Method m(String className, String methodName, Class[] types) throws ClassNotFoundException, NoSuchMethodException {
+		System.out.println("Method: " + className + "#" + methodName + "(" + Arrays.toString(types) + ")");
+		return DaemonAdapter.class.getClassLoader().loadClass(className).getMethod(methodName, types);
 	}
 }
