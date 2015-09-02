@@ -161,11 +161,11 @@ public class DaemonCapsule extends Capsule {
 	private static Path copy(String filename, String resourceDir, Path targetDir, OpenOption... opts) throws IOException {
 		try (final InputStream in = DaemonCapsule.class.getClassLoader().getResourceAsStream(resourceDir + '/' + filename)) {
 			final Path f = targetDir.resolve(filename);
-			boolean success = false;
 			Files.createDirectories(f.getParent());
 			try (final OutputStream out = Files.newOutputStream(f, opts)) {
 				copy(in, out);
 				final Path ret = targetDir.resolve(filename);
+				//noinspection ResultOfMethodCallIgnored
 				ret.toFile().setExecutable(true);
 				log(LOG_VERBOSE, "Successfully copied resource " + resourceDir + "/" + filename + " to " + targetDir.toAbsolutePath().normalize().toString());
 				return ret;
