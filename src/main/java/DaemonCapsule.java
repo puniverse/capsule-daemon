@@ -370,7 +370,10 @@ public class DaemonCapsule extends Capsule {
 
 		int i = 1;
 		ret.add(i++, "-java-home");
-		ret.add(i++, getJavaHome().toAbsolutePath().normalize().toString());
+		Path javaHome = getJavaHome().toAbsolutePath().normalize();
+		if (isMac() && javaHome.toString().endsWith("/Home/jre"))
+			javaHome = javaHome.getParent();
+		ret.add(i++, javaHome.toString());
 
 		i = addPropertyOrAttributeStringAsOption(ret, PROP_USER, ATTR_USER, "-user", i);
 
@@ -412,17 +415,24 @@ public class DaemonCapsule extends Capsule {
 
 		i = addAttributeStringAsProperty(ret, ATTR_INIT_CLASS, DaemonAdapter.PROP_INIT_CLASS, i);
 		i = addAttributeStringAsProperty(ret, ATTR_INIT_METHOD, DaemonAdapter.PROP_INIT_METHOD, i);
+
 		// TODO Not nicest but redefining ATTR_APP_CLASS seems to break a lot of stuff
 		final String startC = getAttribute(ATTR_START_CLASS);
-		final String appClass = ret.remove(ret.size() - 1); // Class
-		ret.add(i, "-D" + DaemonAdapter.PROP_START_CLASS + "=" + (startC != null ? startC : appClass));
+		String appClass = null;
+		for (int j = 0 ; j < ret.size() ; j++) {
+			if (getAttribute(ATTR_APP_CLASS).equals(ret.get(j))) {
+				appClass = ret.remove(j);
+				ret.add(j, DaemonAdapter.class.getName());
+			}
+		}
+		ret.add(i++, "-D" + DaemonAdapter.PROP_START_CLASS + "=" + (startC != null ? startC : appClass));
+
 		final String startM = getAttribute(ATTR_START_METHOD);
-		ret.add(i, "-D" + DaemonAdapter.PROP_START_METHOD + "=" + (startM != null ? startM : "main"));
+		ret.add(i++, "-D" + DaemonAdapter.PROP_START_METHOD + "=" + (startM != null ? startM : "main"));
 		i = addAttributeStringAsProperty(ret, ATTR_STOP_CLASS, DaemonAdapter.PROP_STOP_METHOD, i);
 		i = addAttributeStringAsProperty(ret, ATTR_DESTROY_CLASS, DaemonAdapter.PROP_DESTROY_CLASS, i);
 		addAttributeStringAsProperty(ret, ATTR_DESTROY_METHOD, DaemonAdapter.PROP_DESTROY_METHOD, i);
 
-		ret.add(DaemonAdapter.class.getName());
 		return ret;
 	}
 
