@@ -49,7 +49,7 @@ public class DaemonAdapter {
 	private static Object i(String className, String methodName, Object o, Object[] args, Class[] argTypes) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException {
 		if (className != null && methodName != null)
 			return m(className, methodName, argTypes).invoke(o, args);
-		return null;
+		return args;
 	}
 	private static Object i(String className, String methodName) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException {
 		return i(className, methodName, null, null, null);
