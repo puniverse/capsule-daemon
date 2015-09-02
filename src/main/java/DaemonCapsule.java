@@ -139,15 +139,17 @@ public class DaemonCapsule extends Capsule {
 	private Path setupBinDir() {
 		try {
 			final Path libdir = findOwnJarFile().toAbsolutePath().getParent().resolve("bin");
+			final String[] ress =  new String[] {
+				"jsvc/linux64-brew/jsvc",
+				"jsvc/macosx-yosemite-brew/jsvc",
+				"procrun/prunsrv.exe",
+			};
+			log(LOG_VERBOSE, "Copying daemon native helpers " + Arrays.toString(ress) + " in " + libdir.toAbsolutePath().normalize().toString());
 			if (Files.exists(libdir))
 				delete(libdir);
 			addTempFile(Files.createDirectory(libdir));
 
-			for (String filename : new String[] {
-				"jsvc/linux64-brew/jsvc",
-				"jsvc/macosx-yosemite-brew/jsvc",
-				"procrun/prunsrv.exe",
-			})
+			for (final String filename : ress)
 				copy(filename, "bin", libdir);
 
 			return libdir;
@@ -159,11 +161,13 @@ public class DaemonCapsule extends Capsule {
 	private static Path copy(String filename, String resourceDir, Path targetDir, OpenOption... opts) throws IOException {
 		try (final InputStream in = DaemonCapsule.class.getClassLoader().getResourceAsStream(resourceDir + '/' + filename)) {
 			final Path f = targetDir.resolve(filename);
+			boolean success = false;
 			Files.createDirectories(f.getParent());
 			try (final OutputStream out = Files.newOutputStream(f, opts)) {
 				copy(in, out);
 				final Path ret = targetDir.resolve(filename);
 				ret.toFile().setExecutable(true);
+				log(LOG_VERBOSE, "Successfully copied resource " + resourceDir + "/" + filename + " to " + targetDir.toAbsolutePath().normalize().toString());
 				return ret;
 			}
 		}
