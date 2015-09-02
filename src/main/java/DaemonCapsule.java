@@ -337,16 +337,18 @@ public class DaemonCapsule extends Capsule {
 		for (final String c : cmds) {
 			if ("-cp".equals(c) || "-classpath".equals(c))
 				outJvmOpts.add("--Classpath");
-			if ("-Xmx".equals(c))
+			else if ("-Xmx".equals(c))
 				outJvmOpts.add("--JvmMx");
-			if ("-Xms".equals(c))
+			else if ("-Xms".equals(c))
 				outJvmOpts.add("--JvmMs");
-			if ("-Xss".equals(c))
+			else if ("-Xss".equals(c))
 				outJvmOpts.add("--JvmSs");
-			if ("-Djava.library.path".equals(c))
+			else if (c.startsWith("-Djava.library.path=")) {
 				outJvmOpts.add("--LibraryPath");
-			if (c.startsWith("-D") || c.startsWith("-X")
-				// TODO check they are supported by procrun
+				outJvmOpts.add(c.substring("-Djava.library.path=".length()));
+			}
+			else if (c.startsWith("-D") || c.startsWith("-X")
+				// TODO check if they are supported by procrun
 				|| "-server".equals(c) || "-client".equals(c) || "-d32".equals(c) || "-d64".equals(c)
 				|| "-?".equals(c) || "-help".equals(c) || "-showversion".equals(c)
 				|| "-esa".equals(c) || "-dsa".equals(c) || "-enablesystemassertions".equals(c) || "-disablesystemassertions".equals(c)
