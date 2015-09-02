@@ -35,19 +35,19 @@ public class DaemonCapsule extends Capsule {
 	//<editor-fold defaultstate="collapsed" desc="Configuration">
 	// Common
 	private static final Map.Entry<String, String> ATTR_START_CLASS = ATTRIBUTE("Daemon-Start-Class", T_STRING(), null, true, "Class containing the start method (default: app's main)"); // TODO Test
-	private static final Map.Entry<String, String> ATTR_START_METHOD = ATTRIBUTE("Daemon-Start-Method", T_STRING(), null, true, "Static 'String[] -> void' service start method short name run as the specified, if any (default: app's main)"); // TODO Test
+	private static final Map.Entry<String, String> ATTR_START_METHOD = ATTRIBUTE("Daemon-Start-Method", T_STRING(), null, true, "Static 'String[] -> void' service start method short name run as the specified, if any (default: app's main)"); // TODO Test non-default
 	private static final Map.Entry<String, String> ATTR_STOP_CLASS = ATTRIBUTE("Daemon-Stop-Class", T_STRING(), null, true, "Class containing the stop method, if any (default: none)"); // TODO Test
-	private static final Map.Entry<String, String> ATTR_STOP_METHOD = ATTRIBUTE("Daemon-Stop-Method", T_STRING(), null, true, "Static 'String[] -> void' service stop method short name run as the specified, if any (default: none)"); // TODO Test	private static final String PROP_USER = "capsule.daemon.user"; // TODO Test
-	private static final String PROP_USER = "capsule.daemon.user"; // TODO Test
+	private static final Map.Entry<String, String> ATTR_STOP_METHOD = ATTRIBUTE("Daemon-Stop-Method", T_STRING(), null, true, "Static 'String[] -> void' service stop method short name run as the specified, if any (default: none)"); // TODO Test
+	private static final String PROP_USER = "capsule.daemon.user"; // TODO Test on windows
 	private static final Map.Entry<String, String> ATTR_USER = ATTRIBUTE("Daemon-User", T_STRING(), null, true, "The username under which the service will run");
-	private static final String PROP_CWD = "capsule.daemon.cwd"; // TODO Test
-	private static final Map.Entry<String, String> ATTR_CWD = ATTRIBUTE("Daemon-Cwd", T_STRING(), null, true, "Working dir (default: /)"); // TODO Test
-	private static final String PROP_STDOUT_FILE = "capsule.daemon.stdoutFile"; // TODO Test
-	private static final Map.Entry<String, String> ATTR_STDOUT_FILE = ATTRIBUTE("Daemon-Stdout-File", T_STRING(), null, true, "stdout (default: /dev/null)"); // TODO Test
-	private static final String PROP_STDERR_FILE = "capsule.daemon.stderrFile"; // TODO Test
-	private static final Map.Entry<String, String> ATTR_STDERR_FILE = ATTRIBUTE("Daemon-Stderr-File", T_STRING(), null, true, "stderr (default: /dev/null)"); // TODO Test
-	private static final String PROP_PID_FILE = "capsule.daemon.pidFile";
-	private static final Map.Entry<String, String> ATTR_PID_FILE = ATTRIBUTE("Daemon-PID-File", T_STRING(), null, true, "PID file (default: /var/run/<appid>.pid)");
+	private static final String PROP_CWD = "capsule.daemon.cwd"; // TODO Test on windows
+	private static final Map.Entry<String, String> ATTR_CWD = ATTRIBUTE("Daemon-Cwd", T_STRING(), null, true, "Working dir (default: /)"); // TODO Test on windows
+	private static final String PROP_STDOUT_FILE = "capsule.daemon.stdoutFile"; // TODO Test on windows
+	private static final Map.Entry<String, String> ATTR_STDOUT_FILE = ATTRIBUTE("Daemon-Stdout-File", T_STRING(), null, true, "stdout (default: /dev/null)"); // TODO Test on windows
+	private static final String PROP_STDERR_FILE = "capsule.daemon.stderrFile"; // TODO Test on windows
+	private static final Map.Entry<String, String> ATTR_STDERR_FILE = ATTRIBUTE("Daemon-Stderr-File", T_STRING(), null, true, "stderr (default: /dev/null)"); // TODO Test on windows
+	private static final String PROP_PID_FILE = "capsule.daemon.pidFile"; // TODO Test
+	private static final Map.Entry<String, String> ATTR_PID_FILE = ATTRIBUTE("Daemon-PID-File", T_STRING(), null, true, "PID file (default: /var/run/<appid>.pid)"); // TODO Test
 
 	// Windows only
 	private static final String PROP_PASSWORD = "capsule.daemon.password"; // TODO Test
@@ -81,7 +81,7 @@ public class DaemonCapsule extends Capsule {
 
 	// Unix only
 	private static final String PROP_CHECK_ONLY = "capsule.daemon.checkOnly"; // TODO Test
-	private static final String PROP_DEBUG = "capsule.daemon.debug"; // TODO Test
+	private static final String PROP_DEBUG = "capsule.daemon.debug";
 	private static final String PROP_VERBOSE = "capsule.daemon.verbose"; // TODO Test
 
 	private static final Map.Entry<String, String> ATTR_INIT_CLASS = ATTRIBUTE("Init-Class", T_STRING(), null, true, "Class containing the init method (default: none, Unix only)");  // TODO Test
