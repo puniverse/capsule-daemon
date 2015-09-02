@@ -63,7 +63,6 @@ public class DaemonAdapter {
 	}
 
 	private static Method m(String className, String methodName, Class[] types) throws ClassNotFoundException, NoSuchMethodException {
-		System.out.println("Method: " + className + "#" + methodName + "(" + Arrays.toString(types) + ")");
 		return DaemonAdapter.class.getClassLoader().loadClass(className).getMethod(methodName, types);
 	}
 }
