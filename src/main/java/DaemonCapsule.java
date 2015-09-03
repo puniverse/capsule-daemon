@@ -188,9 +188,11 @@ public class DaemonCapsule extends Capsule {
 		// Remove old service and re-install
 		// TODO Do only if needed
 		try {
-			new ProcessBuilder().command(svcExec.toString(), "delete", svcName).start().wait();
-			// TODO log
+			final ProcessBuilder pb = new ProcessBuilder().command(svcExec.toString(), "delete", svcName);
+			log(LOG_VERBOSE, "Windows: trying to delete service " + svcName + " with command: " + pb.command().toString());
+			pb.start().wait();
 		} catch (InterruptedException | IOException ignored) {
+			log(LOG_VERBOSE, "Windows: couldn't delete service " + svcName + ": " + ignored.getMessage());
 			// Try proceeding anyway
 		}
 
@@ -302,7 +304,7 @@ public class DaemonCapsule extends Capsule {
 		// Re-install
 		// TODO Do only if needed
 		try {
-			// TODO log
+			log(LOG_VERBOSE, "Windows: installing service " + svcName + " with command: " + installCmd.toString());
 			new ProcessBuilder(installCmd).start().waitFor();
 		} catch (InterruptedException | IOException e) {
 			throw new RuntimeException(e);
