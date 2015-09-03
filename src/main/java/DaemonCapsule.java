@@ -313,8 +313,13 @@ public class DaemonCapsule extends Capsule {
 
 		i = addPropertyOrAttributeStringAsOption(installCmd, PROP_LOG_LEVEL, ATTR_LOG_LEVEL, "--LogLevel", i);
 
-		i = addPropertyOrAttributeStringAsOption(installCmd, PROP_STDOUT_FILE, ATTR_STDOUT_FILE, "--StdOutput", i);
-		i = addPropertyOrAttributeStringAsOption(installCmd, PROP_STDERR_FILE, ATTR_STDERR_FILE, "--StdError", i);
+		installCmd.add(i++, "--StdOutput");
+		final String stdout = getPropertyOrAttributeString(PROP_STDOUT_FILE, ATTR_STDOUT_FILE);
+		installCmd.add(i++, stdout != null ? stdout : "auto");
+
+		installCmd.add(i++, "--StdError");
+		final String stderr = getPropertyOrAttributeString(PROP_STDERR_FILE, ATTR_STDERR_FILE);
+		installCmd.add(i++, stderr != null ? stderr : "auto");
 
 		installCmd.add(i++, "--PidFile");
 		final String pid = getPropertyOrAttributeString(PROP_PID_FILE, ATTR_PID_FILE);
