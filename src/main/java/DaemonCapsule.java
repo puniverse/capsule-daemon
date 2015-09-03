@@ -189,10 +189,13 @@ public class DaemonCapsule extends Capsule {
 		// TODO Do only if needed
 		try {
 			final ProcessBuilder pb = new ProcessBuilder().command(svcExec.toString(), "delete", svcName);
-			log(LOG_VERBOSE, "Windows: trying to delete service " + svcName + " with command: " + pb.command().toString());
-			pb.start().wait();
+			final Process p = pb.start();
+			if (p.waitFor() != 0)
+				log(LOG_VERBOSE, "Windows: couldn't delete service " + svcName + ".\n\tstderr:\n\t\t" + slurp(p.getErrorStream()) + "\n\tstdout:\n\t\t" + slurp(p.getInputStream()));
+			else
+				log(LOG_VERBOSE, "Windows: service " + svcName + " successfully deleted");
 		} catch (InterruptedException | IOException ignored) {
-			log(LOG_VERBOSE, "Windows: couldn't delete service " + svcName + ": " + ignored.getMessage());
+			log(LOG_VERBOSE, "Windows: couldn't delete service " + svcName + ", exception message: " + ignored.getMessage());
 			// Try proceeding anyway
 		}
 
@@ -325,7 +328,11 @@ public class DaemonCapsule extends Capsule {
 		// TODO Do only if needed
 		try {
 			log(LOG_VERBOSE, "Windows: installing service " + svcName + " with command: " + installCmd.toString());
-			new ProcessBuilder(installCmd).start().waitFor();
+			final Process p = new ProcessBuilder(installCmd).start();
+			if (p.waitFor() != 0)
+				log(LOG_VERBOSE, "Windows: couldn't install install " + svcName + ".\n\tstderr:\n\t\t" + slurp(p.getErrorStream()) + "\n\tstdout:\n\t\t" + slurp(p.getInputStream()));
+			else
+				log(LOG_VERBOSE, "Windows: service " + svcName + " successfully installed");
 		} catch (InterruptedException | IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -546,6 +553,16 @@ public class DaemonCapsule extends Capsule {
 		for (String v : vals)
 			sb.append(sep).append(v);
 		return sb.toString();
+	}
+
+	private static String slurp(InputStream in) throws IOException {
+		final StringBuilder out = new StringBuilder();
+		final byte[] b = new byte[4096];
+		int n;
+		while ((n = in.read(b)) != -1)
+			out.append(new String(b, 0, n));
+
+		return out.toString();
 	}
 	//</editor-fold>
 }
