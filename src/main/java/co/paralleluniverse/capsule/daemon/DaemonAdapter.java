@@ -31,8 +31,11 @@ public class DaemonAdapter {
 	public static void init(String args[]) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException {
 		mainArgs = (String[]) i(p(PROP_INIT_CLASS), p(PROP_INIT_METHOD), args);
 	}
+	public static void main(String[] args) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException {
+		i(p(PROP_START_CLASS), p(PROP_START_METHOD), new Object[] { args }, STRING_ARRAY_ARG_TYPES);
+	}
 	public static void start() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException {
-		i(p(PROP_START_CLASS), p(PROP_START_METHOD), new Object[] { mainArgs }, STRING_ARRAY_ARG_TYPES);
+		main(mainArgs);
 	}
 	public static void stop() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException {
 		i(p(PROP_STOP_CLASS), p(PROP_STOP_METHOD));
