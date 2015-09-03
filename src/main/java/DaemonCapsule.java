@@ -197,26 +197,28 @@ public class DaemonCapsule extends Capsule {
 		}
 
 		final List<String> installCmd = new ArrayList<>();
-		final List<String> jvmOpts = new ArrayList<>();
-		final List<String> appOpts = new ArrayList<>();
-		// TODO Not nicest but redefining ATTR_APP_CLASS seems to break a lot of stuff
-		final String appClass = parseWindows(cmd, jvmOpts, appOpts);
-
-		int i = 1;
 
 		installCmd.add(svcExec.toString());
 		installCmd.add("install");
 		installCmd.add(svcName);
 
-		installCmd.add("--JavaHome");
-		installCmd.add(getJavaHome().toAbsolutePath().normalize().toString());
+		final List<String> jvmOpts = new ArrayList<>();
+		final List<String> appOpts = new ArrayList<>();
+
+		// TODO Not nicest but redefining ATTR_APP_CLASS seems to break a lot of stuff
+		final String appClass = parseWindows(cmd, installCmd, jvmOpts, appOpts);
+
+		int i = installCmd.size();
+
+		installCmd.add(i++, "--JavaHome");
+		installCmd.add(i++, getJavaHome().toAbsolutePath().normalize().toString());
 
 		// Add attrs
-		installCmd.add("--Description");
+		installCmd.add(i++, "--Description");
 		final String desc = getPropertyOrAttributeString(PROP_DESCRIPTION, ATTR_DESCRIPTION);
-		installCmd.add(desc != null ? desc : getAppId());
+		installCmd.add(i++, desc != null ? desc : getAppId());
 
-		installCmd.add( "--DisplayName");
+		installCmd.add(i++, "--DisplayName");
 		final String dName = getPropertyOrAttributeString(PROP_DISPLAY_NAME, ATTR_DISPLAY_NAME);
 		installCmd.add(i++, dName != null ? dName : getAppId());
 
@@ -225,7 +227,7 @@ public class DaemonCapsule extends Capsule {
 
 		// TODO mangle http://commons.apache.org/proper/commons-daemon/procrun.html
 		final List<String> dependsOn = getPropertyOrAttributeStringList(PROP_DEPENDS_ON, ATTR_DEPENDS_ON);
-		if (dependsOn != null) {
+		if (dependsOn != null && !dependsOn.isEmpty()) {
 			installCmd.add(i++, "++DependsOn");
 			installCmd.add(i++, join(dependsOn, ";"));
 		}
@@ -236,8 +238,10 @@ public class DaemonCapsule extends Capsule {
 			final ArrayList<String> envL = new ArrayList<>();
 			for (final String e : env.keySet())
 				envL.add(e + "=" + env.get(e));
-			installCmd.add(i++, "++Environment");
-			installCmd.add(i++, join(envL, ";"));
+			if (!envL.isEmpty()) {
+				installCmd.add(i++, "++Environment");
+				installCmd.add(i++, join(envL, ";"));
+			}
 		}
 
 		i = addPropertyOrAttributeStringAsOption(installCmd, PROP_JAVA_EXEC_USER, ATTR_JAVA_EXEC_USER, "--User", i);
@@ -250,10 +254,17 @@ public class DaemonCapsule extends Capsule {
 
 		i = addPropertyOrAttributeStringAsOption(installCmd, PROP_CWD, ATTR_CWD, "--StartPath", i);
 
+		// Not using DaemonAdapter, not needed for Windows
+
+		installCmd.add(i++, "--StartClass");
 		final String startC = getAttribute(ATTR_START_CLASS);
-		jvmOpts.add(i, "-D" + DaemonAdapter.PROP_START_CLASS + "=" + (startC != null ? startC : appClass));
+		installCmd.add(i++, (startC != null ? startC : appClass));
+
 		final String startM = getAttribute(ATTR_START_METHOD);
-		jvmOpts.add(i, "-D" + DaemonAdapter.PROP_START_METHOD + "=" + (startM != null ? startM : "main"));
+		if (startM != null) {
+			installCmd.add(i++, "--StartMethod");
+			installCmd.add(i++, startM);
+		}
 
 		// TODO mangle http://commons.apache.org/proper/commons-daemon/procrun.html
 		if (!appOpts.isEmpty()) {
@@ -266,12 +277,21 @@ public class DaemonCapsule extends Capsule {
 
 		i = addPropertyOrAttributeStringAsOption(installCmd, PROP_CWD, ATTR_CWD, "--StopPath", i);
 
-		i = addAttributeStringAsProperty(jvmOpts, ATTR_STOP_CLASS, DaemonAdapter.PROP_STOP_CLASS, i);
-		i = addAttributeStringAsProperty(jvmOpts, ATTR_STOP_METHOD, DaemonAdapter.PROP_STOP_METHOD, i);
+		final String stopC = getAttribute(ATTR_STOP_CLASS);
+		if (stopC != null) {
+			installCmd.add(i++, "--StopClass");
+			installCmd.add(i++, stopC);
+		}
+
+		final String stopM = getAttribute(ATTR_STOP_METHOD);
+		if (stopM != null) {
+			installCmd.add(i++, "--StopMethod");
+			installCmd.add(i++, stopM);
+		}
 
 		// TODO mangle http://commons.apache.org/proper/commons-daemon/procrun.html
 		final List<String> stopParams = getPropertyOrAttributeStringList(PROP_STOP_PARAMS, ATTR_STOP_PARAMS);
-		if (stopParams != null) {
+		if (stopParams != null && !stopParams.isEmpty()) {
 			installCmd.add(i++, "++StopParams");
 			installCmd.add(i++, join(stopParams, ";"));
 		}
@@ -334,11 +354,18 @@ public class DaemonCapsule extends Capsule {
 		return pos;
 	}
 
-	private String parseWindows(List<String> cmds, List<String> outJvmOpts, List<String> outAppOpts) {
+	private String parseWindows(List<String> cmds, List<String> outCmdOpts, List<String> outJvmOpts, List<String> outAppOpts) {
 		final List<String> otherJvmOpts = new ArrayList<>();
-		for (final String c : cmds) {
-			if ("-cp".equals(c) || "-classpath".equals(c))
-				outJvmOpts.add("--Classpath");
+		boolean addToCmdOpts = false;
+		for (final String c : cmds.subList(1, cmds.size())) { // Skip actual command
+			if (addToCmdOpts) {
+				addToCmdOpts = false;
+				outCmdOpts.add(c);
+			}
+			else if ("-cp".equals(c) || "-classpath".equals(c)) {
+				outCmdOpts.add("--Classpath");
+				addToCmdOpts = true;
+			}
 			else if ("-Xmx".equals(c))
 				outJvmOpts.add("--JvmMx");
 			else if ("-Xms".equals(c))
@@ -346,8 +373,8 @@ public class DaemonCapsule extends Capsule {
 			else if ("-Xss".equals(c))
 				outJvmOpts.add("--JvmSs");
 			else if (c.startsWith("-Djava.library.path=")) {
-				outJvmOpts.add("--LibraryPath");
-				outJvmOpts.add(c.substring("-Djava.library.path=".length()));
+				outCmdOpts.add("--LibraryPath");
+				outCmdOpts.add(c.substring("-Djava.library.path=".length()));
 			}
 			else if (c.startsWith("-D") || c.startsWith("-X")
 				// TODO check if they are supported by procrun
@@ -361,10 +388,10 @@ public class DaemonCapsule extends Capsule {
 			else
 				outAppOpts.add(c);
 		}
-		outJvmOpts.add("++JvmOptions");
 		// TODO mangle http://commons.apache.org/proper/commons-daemon/procrun.html
 		outJvmOpts.add(join(otherJvmOpts, ";"));
-		return outAppOpts.remove(outAppOpts.size() - 1);
+
+		return outAppOpts.remove(outAppOpts.indexOf(getAttribute(ATTR_APP_CLASS)));
 	}
 
 	private List<String> setupUnixCmd(List<String> cmd) {
@@ -420,13 +447,9 @@ public class DaemonCapsule extends Capsule {
 
 		// TODO Not nicest but redefining ATTR_APP_CLASS seems to break a lot of stuff
 		final String startC = getAttribute(ATTR_START_CLASS);
-		String appClass = null;
-		for (int j = 0 ; j < ret.size() ; j++) {
-			if (getAttribute(ATTR_APP_CLASS).equals(ret.get(j))) {
-				appClass = ret.remove(j);
-				ret.add(j, DaemonAdapter.class.getName());
-			}
-		}
+		final int appClassIdx = ret.indexOf(getAttribute(ATTR_APP_CLASS));
+		final String appClass = ret.remove(appClassIdx);
+		ret.add(appClassIdx, DaemonAdapter.class.getName());
 		ret.add(i++, "-D" + DaemonAdapter.PROP_START_CLASS + "=" + (startC != null ? startC : appClass));
 
 		final String startM = getAttribute(ATTR_START_METHOD);
