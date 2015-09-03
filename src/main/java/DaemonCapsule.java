@@ -53,9 +53,9 @@ public class DaemonCapsule extends Capsule {
 	private static final String PROP_PASSWORD = "capsule.daemon.password"; // TODO Test
 	private static final Map.Entry<String, String> ATTR_PASSWORD = ATTRIBUTE("Daemon-Password", T_STRING(), null, true, "The password of the user under which the service will run (default: none, Windows only)"); // TODO Test
 	private static final String PROP_JAVA_EXEC_USER = "capsule.daemon.javaExecUser"; // TODO Test
-	private static final Map.Entry<String, String> ATTR_JAVA_EXEC_USER = ATTRIBUTE("Daemon-Java-Exec-User", T_STRING(), null, true, "The user password that will execute the final Java process (default: none, Windows only)"); // TODO Test
+	private static final Map.Entry<String, String> ATTR_JAVA_EXEC_USER = ATTRIBUTE("Daemon-Java-Exec-User", T_STRING(), null, true, "The password of the user that will execute the final Java process (default: none, Windows only)"); // TODO Test
 	private static final String PROP_JAVA_EXEC_PASSWORD = "capsule.daemon.javaExecPassword"; // TODO Test
-	private static final Map.Entry<String, String> ATTR_JAVA_EXEC_PASSWORD = ATTRIBUTE("Daemon-Java-Exec-Password", T_STRING(), null, true, "The user password that will execute the final Java process (default: none, Windows only)"); // TODO Test
+	private static final Map.Entry<String, String> ATTR_JAVA_EXEC_PASSWORD = ATTRIBUTE("Daemon-Java-Exec-Password", T_STRING(), null, true, "The password of the user that will execute the final Java process (default: none, Windows only)"); // TODO Test
 	private static final String PROP_SERVICE_NAME = "capsule.daemon.serviceName"; // TODO Test
 	private static final Map.Entry<String, String> ATTR_SERVICE_NAME = ATTRIBUTE("Daemon-Service-Name", T_STRING(), null, true, "The service internal name (default: app ID, Windows only)"); // TODO Test
 	private static final String PROP_DISPLAY_NAME = "capsule.daemon.displayName"; // TODO Test
@@ -67,7 +67,7 @@ public class DaemonCapsule extends Capsule {
 	private static final String PROP_TYPE = "capsule.daemon.type"; // TODO Test
 	private static final Map.Entry<String, String> ATTR_TYPE = ATTRIBUTE("Daemon-Type", T_STRING(), null, true, "The service type, it can be 'interactive' (default: none, Windows only)"); // TODO Test
 	private static final String PROP_DEPENDS_ON = "capsule.daemon.dependsOn"; // TODO Test
-	private static final Map.Entry<String, List<String>> ATTR_DEPENDS_ON = ATTRIBUTE("Daemon-Depends-On", T_LIST(T_STRING()), null, true, "The service type, it can be 'interactive' (default: none, Windows only)"); // TODO Test
+	private static final Map.Entry<String, List<String>> ATTR_DEPENDS_ON = ATTRIBUTE("Daemon-Depends-On", T_LIST(T_STRING()), null, true, "The service dependencies, as a list (default: none, Windows only)"); // TODO Test
 	private static final String PROP_STOP_PARAMS = "capsule.daemon.stopParams"; // TODO Test
 	private static final Map.Entry<String, List<String>> ATTR_STOP_PARAMS = ATTRIBUTE("Daemon-Stop-Params", T_LIST(T_STRING()), null, true, "The service stop parameters (default: none, Windows only)"); // TODO Test
 	private static final String PROP_STOP_TIMEOUT = "capsule.daemon.stopTimeout"; // TODO Test
@@ -75,7 +75,7 @@ public class DaemonCapsule extends Capsule {
 	private static final String PROP_LOG_PATH = "capsule.daemon.logPath"; // TODO Test
 	private static final Map.Entry<String, String> ATTR_LOG_PATH = ATTRIBUTE("Daemon-Log-Path", T_STRING(), null, true, "The log path (default: %SystemRoot%\\System32\\LogFiles\\Apache, Windows only)"); // TODO Test
 	private static final String PROP_LOG_PREFIX = "capsule.daemon.logPrefix"; // TODO Test
-	private static final Map.Entry<String, String> ATTR_LOG_PREFIX = ATTRIBUTE("Daemon-Log-Prefix", T_STRING(), null, true, "The log prefix (default: app IDe, Windows only)"); // TODO Test
+	private static final Map.Entry<String, String> ATTR_LOG_PREFIX = ATTRIBUTE("Daemon-Log-Prefix", T_STRING(), null, true, "The log prefix (default: app ID, Windows only)"); // TODO Test
 	private static final String PROP_LOG_LEVEL = "capsule.daemon.logLevel"; // TODO Test
 	private static final Map.Entry<String, String> ATTR_LOG_LEVEL = ATTRIBUTE("Daemon-Log-Level", T_STRING(), null, true, "The log level between 'error', 'info', 'warn' and 'debug' (default: info, Windows only)"); // TODO Test
 
