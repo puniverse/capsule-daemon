@@ -45,8 +45,9 @@ dependencies {
 jar {
     manifest {
         attributes (
-            'Main-Class'  : 'Capsule',
-            'Caplets'     : 'DaemonCapsule'
+            'Premain-Class'  : 'Capsule',
+            'Main-Class'     : 'Capsule',
+            'Caplets'        : 'DaemonCapsule'
         )
     }
 }
@@ -54,16 +55,8 @@ jar {
 shadowJar {
     outputs.upToDateWhen { false }
 
-    // artifactAttached = false
-    classifier = 'shadow'
+    classifier = '' // overwrite existing jar
     destinationDir = file("$buildDir/libs")
-
-//    relocate 'org.apache.', 'capsule.org.apache.'
-
-    doLast {
-        logger.info("$buildDir/libs/${project.name}-${project.version}-shadow.jar -> $buildDir/libs/${project.name}-${project.version}.jar")
-        file("$buildDir/libs/${project.name}-${version}-shadow.jar").renameTo(file("$buildDir/libs/${project.name}-${project.version}.jar"))
-    }
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
