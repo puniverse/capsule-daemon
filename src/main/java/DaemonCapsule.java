@@ -397,7 +397,7 @@ public class DaemonCapsule extends Capsule {
 	}
 
 	private Path getDaemonDir() throws IOException {
-		final Path ret = appDir().resolve("daemon");
+		@SuppressWarnings("deprecation") final Path ret = getCacheDir().resolve("daemon");
 		if (!Files.exists(ret))
 			Files.createDirectories(ret);
 		return ret;
