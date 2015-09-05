@@ -108,8 +108,6 @@ public class DaemonCapsule extends Capsule {
 	}
 
 	@Override
-
-	@Override
 	protected Path getJavaExecutable() {
 		if (svcExec == null)
 			svcExec = setupBinDir().resolve(platformExecPath()).toAbsolutePath().normalize();
@@ -144,6 +142,12 @@ public class DaemonCapsule extends Capsule {
 		}
 		return new ProcessBuilder(svcCmd);
 	}
+
+	@Override
+	protected Process postlaunch(Process child) {
+		return null; // Don't wait for the child: the management of the service application is delegated to 'jsvc'/'procrun'
+	}
+
 	//<editor-fold defaultstate="collapsed" desc="Utils">
 	private Path setupBinDir() {
 		try {
