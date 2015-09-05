@@ -648,8 +648,27 @@ public class DaemonCapsule extends Capsule {
 		}
 	}
 
-	private static final String doubleQuote(String s) {
+	private static String doubleQuote(String s) {
+		if (s.startsWith("\"") && s.endsWith("\"")) {
+			if (escaped("\"", s))
+				return s;
+			return s.replace("\"", "\\\"");
+		}
 		return "\"" + s.replace("\"", "\\\"") + "\"";
+	}
+
+	private static boolean escaped(String s, String in) {
+		int idx = 0;
+		while ((idx = in.indexOf(s, idx)) != -1) {
+			if (idx == 0 || in.charAt(idx - 1) != '\\')
+				return false;
+		}
+		return true;
+	}
+
+	private static String removeCapsulePort(String s) {
+		final Matcher m = CAPSULE_PORT_PATTERN.matcher(s);
+		return m.replaceFirst("");
 	}
 	//</editor-fold>
 }
