@@ -41,7 +41,7 @@ public class DaemonCapsule extends Capsule {
 	private static final Map.Entry<String, String> ATTR_START_METHOD = ATTRIBUTE("Daemon-Start-Method", T_STRING(), null, true, "Static 'String[] -> void' service start method short name run as the specified, if any (default: app's main)"); // TODO Test non-default
 	private static final Map.Entry<String, String> ATTR_STOP_CLASS = ATTRIBUTE("Daemon-Stop-Class", T_STRING(), null, true, "Class containing the stop method, if any (default: none)"); // TODO Test
 	private static final Map.Entry<String, String> ATTR_STOP_METHOD = ATTRIBUTE("Daemon-Stop-Method", T_STRING(), null, true, "Static 'String[] -> void' service stop method short name run as the specified, if any (default: none)"); // TODO Test
-	private static final String PROP_USER = "capsule.daemon.user"; // TODO Test on windows
+	private static final String PROP_USER = "capsule.daemon.user";
 	private static final Map.Entry<String, String> ATTR_USER = ATTRIBUTE("Daemon-User", T_STRING(), null, true, "The username under which the service will run");
 	private static final String PROP_CWD = "capsule.daemon.cwd";
 	private static final Map.Entry<String, String> ATTR_CWD = ATTRIBUTE("Daemon-Cwd", T_STRING(), null, true, "Working dir (default: / on Unix)");
