@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,6 +32,8 @@ import java.util.Map;
  * @author circlespainter
  */
 public class DaemonCapsule extends Capsule {
+
+	private static final String CONF_FILE = "WindowsServiceCmdline";
 
 	//<editor-fold defaultstate="collapsed" desc="Configuration">
 	// Common
@@ -107,7 +110,12 @@ public class DaemonCapsule extends Capsule {
 	@Override
 	protected final ProcessBuilder prelaunch(List<String> jvmArgs, List<String> args) {
 		final ProcessBuilder pb = super.prelaunch(jvmArgs, args);
-		final List<String> svcCmd = toSvc(pb.command());
+		final List<String> svcCmd;
+		try {
+			svcCmd = toSvc(pb.command());
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
 		return new ProcessBuilder(svcCmd);
 	}
 
@@ -173,31 +181,17 @@ public class DaemonCapsule extends Capsule {
 		}
 	}
 
-	private List<String> toSvc(List<String> cmd) {
+	private List<String> toSvc(List<String> cmd) throws IOException {
 		if (isWindows())
 			return setupWindowsCmd(cmd);
 		else
 			return setupUnixCmd(cmd);
 	}
 
-	private List<String> setupWindowsCmd(List<String> cmd) {
+	private List<String> setupWindowsCmd(List<String> cmd) throws IOException {
 		String svcName = getPropertyOrAttributeString(PROP_SERVICE_NAME, ATTR_SERVICE_NAME);
 		if (svcName == null)
 			svcName = getAppId();
-
-		// Remove old service and re-install
-		// TODO Do only if needed
-		try {
-			final ProcessBuilder pb = new ProcessBuilder().command(svcExec.toString(), "delete", svcName);
-			final Process p = pb.start();
-			if (p.waitFor() != 0)
-				log(LOG_VERBOSE, "Windows: couldn't delete service " + svcName + ".\n\tstderr:\n\t\t" + slurp(p.getErrorStream()) + "\n\tstdout:\n\t\t" + slurp(p.getInputStream()));
-			else
-				log(LOG_VERBOSE, "Windows: service " + svcName + " successfully deleted");
-		} catch (InterruptedException | IOException ignored) {
-			log(LOG_VERBOSE, "Windows: couldn't delete service " + svcName + ", exception message: " + ignored.getMessage());
-			// Try proceeding anyway
-		}
 
 		final List<String> installCmd = new ArrayList<>();
 
@@ -329,17 +323,35 @@ public class DaemonCapsule extends Capsule {
 		installCmd.add(i++, "++JvmOptions");
 		installCmd.add(i, join(jvmOpts, ";"));
 
-		// Re-install
-		// TODO Do only if needed
-		try {
-			log(LOG_VERBOSE, "Windows: installing service " + svcName + " with command: " + installCmd.toString());
-			final Process p = new ProcessBuilder(installCmd).start();
-			if (p.waitFor() != 0)
-				log(LOG_VERBOSE, "Windows: couldn't install install " + svcName + ".\n\tstderr:\n\t\t" + slurp(p.getErrorStream()) + "\n\tstdout:\n\t\t" + slurp(p.getInputStream()));
-			else
-				log(LOG_VERBOSE, "Windows: service " + svcName + " successfully installed");
-		} catch (InterruptedException | IOException e) {
-			throw new RuntimeException(e);
+		final String installCmdline = join(installCmd, " ");
+		if (isReinstallNeeded(installCmdline)) {
+			// Write new install cmdline
+			dump(installCmdline, getCmdlineFile());
+
+			// Remove old service
+			try {
+				final ProcessBuilder pb = new ProcessBuilder().command(svcExec.toString(), "delete", svcName);
+				final Process p = pb.start();
+				if (p.waitFor() != 0)
+					log(LOG_VERBOSE, "Windows: couldn't delete service " + svcName + ".\n\tstderr:\n\t\t" + slurp(p.getErrorStream()) + "\n\tstdout:\n\t\t" + slurp(p.getInputStream()));
+				else
+					log(LOG_VERBOSE, "Windows: service " + svcName + " successfully deleted");
+			} catch (InterruptedException | IOException ignored) {
+				log(LOG_VERBOSE, "Windows: couldn't delete service " + svcName + ", exception message: " + ignored.getMessage());
+				// Try proceeding anyway
+			}
+
+			// Re-install
+			try {
+				log(LOG_VERBOSE, "Windows: installing service " + svcName + " with command: " + installCmd.toString());
+				final Process p = new ProcessBuilder(installCmd).start();
+				if (p.waitFor() != 0)
+					log(LOG_VERBOSE, "Windows: couldn't install install " + svcName + ".\n\tstderr:\n\t\t" + slurp(p.getErrorStream()) + "\n\tstdout:\n\t\t" + slurp(p.getInputStream()));
+				else
+					log(LOG_VERBOSE, "Windows: service " + svcName + " successfully installed");
+			} catch (InterruptedException | IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
 
 		// Return command for service start
@@ -348,6 +360,50 @@ public class DaemonCapsule extends Capsule {
 		ret.add("start");
 		ret.add(svcName);
 		return ret;
+	}
+
+	private boolean isReinstallNeeded(String cmdLine) throws IOException {
+		// Check if the conf file exists
+		if (!Files.exists(getCmdlineFile())) {
+			log(LOG_VERBOSE, "Service install cmdline file " + getCmdlineFile() + " is not present");
+			return true;
+		}
+
+		// Check if the conf content has changed
+		if (!new String(Files.readAllBytes(getCmdlineFile()), Charset.defaultCharset()).equals(cmdLine)) {
+			log(LOG_VERBOSE, "Service install cmdline file content " + getCmdlineFile() + " has changed");
+			return true;
+		}
+
+		// Check if the application is newer
+		try {
+			FileTime jarTime = Files.getLastModifiedTime(getJarFile());
+			if (isWrapperCapsule()) {
+				final FileTime wrapperTime = Files.getLastModifiedTime(findOwnJarFile());
+				if (wrapperTime.compareTo(jarTime) > 0)
+					jarTime = wrapperTime;
+			}
+
+			final FileTime confTime = Files.getLastModifiedTime(getCmdlineFile());
+
+			final boolean buildNeeded = confTime.compareTo(jarTime) < 0;
+			if (buildNeeded)
+				log(LOG_VERBOSE, "Application " + getJarFile() + " has changed");
+			return buildNeeded;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private Path getDaemonDir() throws IOException {
+		final Path ret = appDir().resolve("daemon");
+		if (!Files.exists(ret))
+			Files.createDirectories(ret);
+		return ret;
+	}
+
+	private Path getCmdlineFile() throws IOException {
+		return getDaemonDir().resolve(CONF_FILE);
 	}
 
 	private int addPropertyOrAttributeStringAsOption(List<String> outCmd, String prop, Map.Entry<String, String> attr, String opt, int pos) {
@@ -568,6 +624,12 @@ public class DaemonCapsule extends Capsule {
 			out.append(new String(b, 0, n));
 
 		return out.toString();
+	}
+
+	private static void dump(String content, Path loc) throws IOException {
+		try (final PrintWriter out = new PrintWriter(new OutputStreamWriter(Files.newOutputStream(loc), Charset.defaultCharset()))) {
+			out.print(content);
+		}
 	}
 	//</editor-fold>
 }
