@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A caplet that will use jsvc (needs to be installed) to launch the application as an Unix daemon. Several configuration options are provided.
@@ -34,6 +36,7 @@ import java.util.Map;
 public class DaemonCapsule extends Capsule {
 
 	private static final String CONF_FILE = "WindowsServiceCmdline";
+	private static final Pattern CAPSULE_PORT_PATTERN = Pattern.compile("-Dcapsule\\.port=\\d+");
 
 	//<editor-fold defaultstate="collapsed" desc="Configuration">
 	// Common
@@ -371,9 +374,12 @@ public class DaemonCapsule extends Capsule {
 		}
 
 		// Check if the conf content has changed
-		if (!new String(Files.readAllBytes(getCmdlineFile()), Charset.defaultCharset()).equals(cmdLine)) {
-			log(LOG_VERBOSE, "Windows: service install cmdline file content " + getCmdlineFile() + " has changed");
-			return true;
+		try (final InputStream is = new FileInputStream(getCmdlineFile().toFile())) {
+			final String cmdlineFile = slurp(is);
+			if (!removeCapsulePort(cmdlineFile).equals(removeCapsulePort(cmdLine))) {
+				log(LOG_VERBOSE, "Windows: service install cmdline file content " + getCmdlineFile() + " has changed");
+				return true;
+			}
 		}
 
 		// Check if the application is newer
