@@ -108,16 +108,6 @@ public class DaemonCapsule extends Capsule {
 	}
 
 	@Override
-	protected final ProcessBuilder prelaunch(List<String> jvmArgs, List<String> args) {
-		final ProcessBuilder pb = super.prelaunch(jvmArgs, args);
-		final List<String> svcCmd;
-		try {
-			svcCmd = toSvc(pb.command());
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
-		}
-		return new ProcessBuilder(svcCmd);
-	}
 
 	@Override
 	protected Path getJavaExecutable() {
@@ -143,6 +133,17 @@ public class DaemonCapsule extends Capsule {
 		return super.attribute(attr);
 	}
 
+	@Override
+	protected final ProcessBuilder prelaunch(List<String> jvmArgs, List<String> args) {
+		final ProcessBuilder pb = super.prelaunch(jvmArgs, args);
+		final List<String> svcCmd;
+		try {
+			svcCmd = toSvc(pb.command());
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
+		return new ProcessBuilder(svcCmd);
+	}
 	//<editor-fold defaultstate="collapsed" desc="Utils">
 	private Path setupBinDir() {
 		try {
