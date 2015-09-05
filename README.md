@@ -66,6 +66,10 @@ The following additional manifest entries and system properties can be used to c
    - `Daemon-Log-Prefix`: the log prefix (default: app ID). The `capsule.daemon.logPrefix` system property can override it.
    - `Daemon-Log-Level`: the log level between `error`, `info`, `warn` and `debug` (default: `info`). The `capsule.daemon.logLevel` system property can override it.
 
+## Notes
+
+Launch, Java and service execution users must all be able to access the same Capsule's cache directory. You can set it to a commonly accessible location (for example in `/tmp/capsule`) through the `CAPSULE_CACHE_DIR` environment variable.
+
 ## License
 
     Copyright (c) 2015, Parallel Universe Software Co. and Contributors. All rights reserved.
