@@ -200,9 +200,9 @@ public class DaemonCapsule extends Capsule {
 
 		final List<String> installCmd = new ArrayList<>();
 
-		installCmd.add(svcExec.toString());
+		installCmd.add(doubleQuote(svcExec.toString()));
 		installCmd.add("install");
-		installCmd.add(svcName);
+		installCmd.add(doubleQuote(svcName));
 
 		final List<String> jvmOpts = new ArrayList<>();
 		final List<String> appOpts = new ArrayList<>();
@@ -331,7 +331,7 @@ public class DaemonCapsule extends Capsule {
 
 			// Remove old service
 			try {
-				final ProcessBuilder pb = new ProcessBuilder().command(svcExec.toString(), "delete", svcName);
+				final ProcessBuilder pb = new ProcessBuilder().command(doubleQuote(svcExec.toString()), "delete", doubleQuote(svcName));
 				final Process p = pb.start();
 				if (p.waitFor() != 0)
 					log(LOG_VERBOSE, "Windows: couldn't delete service " + svcName + ".\n\tstderr:\n\t\t" + slurp(p.getErrorStream()) + "\n\tstdout:\n\t\t" + slurp(p.getInputStream()));
