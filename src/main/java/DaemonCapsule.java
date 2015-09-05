@@ -153,8 +153,8 @@ public class DaemonCapsule extends Capsule {
 
 	//<editor-fold defaultstate="collapsed" desc="Utils">
 	private Path setupBinDir() {
+		final Path libdir = findOwnJarFile().toAbsolutePath().getParent().resolve("bin");
 		try {
-			final Path libdir = findOwnJarFile().toAbsolutePath().getParent().resolve("bin");
 			final String[] ress =  new String[] {
 				"jsvc/linux64-brew/jsvc",
 				"jsvc/macosx-yosemite-brew/jsvc",
@@ -167,11 +167,10 @@ public class DaemonCapsule extends Capsule {
 
 			for (final String filename : ress)
 				copy(filename, "bin", libdir);
-
-			return libdir;
 		} catch (IOException e) {
-			throw new RuntimeException("Could not extract jsvc/procrun executables", e);
+			log(LOG_VERBOSE, "WARNING: Could not extract jsvc/procrun executables: " + e.getMessage());
 		}
+		return libdir;
 	}
 
 	private static Path copy(String filename, String resourceDir, Path targetDir, OpenOption... opts) throws IOException {
