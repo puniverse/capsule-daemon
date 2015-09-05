@@ -40,10 +40,10 @@ public class DaemonCapsule extends Capsule {
 
 	//<editor-fold defaultstate="collapsed" desc="Configuration">
 	// Common
-	private static final Map.Entry<String, String> ATTR_START_CLASS = ATTRIBUTE("Daemon-Start-Class", T_STRING(), null, true, "Class containing the start method (default: app's main)"); // TODO Test
-	private static final Map.Entry<String, String> ATTR_START_METHOD = ATTRIBUTE("Daemon-Start-Method", T_STRING(), null, true, "Static 'String[] -> void' service start method short name run as the specified, if any (default: app's main)"); // TODO Test non-default
-	private static final Map.Entry<String, String> ATTR_STOP_CLASS = ATTRIBUTE("Daemon-Stop-Class", T_STRING(), null, true, "Class containing the stop method, if any (default: none)"); // TODO Test
-	private static final Map.Entry<String, String> ATTR_STOP_METHOD = ATTRIBUTE("Daemon-Stop-Method", T_STRING(), null, true, "Static 'String[] -> void' service stop method short name run as the specified, if any (default: none)"); // TODO Test
+	private static final Map.Entry<String, String> ATTR_START_CLASS = ATTRIBUTE("Daemon-Start-Class", T_STRING(), null, true, "Class containing the start method (default: app's main)");
+	private static final Map.Entry<String, String> ATTR_START_METHOD = ATTRIBUTE("Daemon-Start-Method", T_STRING(), null, true, "Static 'String[] -> void' service start method short name run as the specified, if any (default: app's main)");
+	private static final Map.Entry<String, String> ATTR_STOP_CLASS = ATTRIBUTE("Daemon-Stop-Class", T_STRING(), null, true, "Class containing the stop method, if any (default: none)");
+	private static final Map.Entry<String, String> ATTR_STOP_METHOD = ATTRIBUTE("Daemon-Stop-Method", T_STRING(), null, true, "Static 'String[] -> void' service stop method short name run as the specified, if any (default: none)");
 	private static final String PROP_USER = "capsule.daemon.user";
 	private static final Map.Entry<String, String> ATTR_USER = ATTRIBUTE("Daemon-User", T_STRING(), null, true, "The username under which the service will run");
 	private static final String PROP_CWD = "capsule.daemon.cwd";
@@ -56,50 +56,50 @@ public class DaemonCapsule extends Capsule {
 	private static final Map.Entry<String, String> ATTR_PID_FILE = ATTRIBUTE("Daemon-PID-File", T_STRING(), null, true, "PID file (default: /var/run/<appid>.pid on Unix, <logpath>/<appid>.pid on Windows)");
 
 	// Windows only
-	private static final String PROP_PASSWORD = "capsule.daemon.password"; // TODO Test
-	private static final Map.Entry<String, String> ATTR_PASSWORD = ATTRIBUTE("Daemon-Password", T_STRING(), null, true, "The password of the user under which the service will run (default: none, Windows only)"); // TODO Test
-	private static final String PROP_JAVA_EXEC_USER = "capsule.daemon.javaExecUser"; // TODO Test
-	private static final Map.Entry<String, String> ATTR_JAVA_EXEC_USER = ATTRIBUTE("Daemon-Java-Exec-User", T_STRING(), null, true, "The password of the user that will execute the final Java process (default: none, Windows only)"); // TODO Test
-	private static final String PROP_JAVA_EXEC_PASSWORD = "capsule.daemon.javaExecPassword"; // TODO Test
-	private static final Map.Entry<String, String> ATTR_JAVA_EXEC_PASSWORD = ATTRIBUTE("Daemon-Java-Exec-Password", T_STRING(), null, true, "The password of the user that will execute the final Java process (default: none, Windows only)"); // TODO Test
-	private static final String PROP_SERVICE_NAME = "capsule.daemon.serviceName"; // TODO Test
-	private static final Map.Entry<String, String> ATTR_SERVICE_NAME = ATTRIBUTE("Daemon-Service-Name", T_STRING(), null, true, "The service internal name (default: app ID, Windows only)"); // TODO Test
-	private static final String PROP_DISPLAY_NAME = "capsule.daemon.displayName"; // TODO Test
-	private static final Map.Entry<String, String> ATTR_DISPLAY_NAME = ATTRIBUTE("Daemon-Display-Name", T_STRING(), null, true, "The service display name (default: app ID, Windows only)"); // TODO Test
-	private static final String PROP_DESCRIPTION = "capsule.daemon.description"; // TODO Test
-	private static final Map.Entry<String, String> ATTR_DESCRIPTION = ATTRIBUTE("Daemon-Description", T_STRING(), null, true, "The service description (default: app ID, Windows only)"); // TODO Test
-	private static final String PROP_STARTUP = "capsule.daemon.startup"; // TODO Test
-	private static final Map.Entry<String, String> ATTR_STARTUP = ATTRIBUTE("Daemon-Startup", T_STRING(), null, true, "The service startup mode, either 'auto' or 'manual' (default: manual, Windows only)"); // TODO Test
-	private static final String PROP_TYPE = "capsule.daemon.type"; // TODO Test
-	private static final Map.Entry<String, String> ATTR_TYPE = ATTRIBUTE("Daemon-Type", T_STRING(), null, true, "The service type, it can be 'interactive' (default: none, Windows only)"); // TODO Test
-	private static final String PROP_DEPENDS_ON = "capsule.daemon.dependsOn"; // TODO Test
-	private static final Map.Entry<String, List<String>> ATTR_DEPENDS_ON = ATTRIBUTE("Daemon-Depends-On", T_LIST(T_STRING()), null, true, "The service dependencies, as a list (default: none, Windows only)"); // TODO Test
-	private static final String PROP_STOP_PARAMS = "capsule.daemon.stopParams"; // TODO Test
-	private static final Map.Entry<String, List<String>> ATTR_STOP_PARAMS = ATTRIBUTE("Daemon-Stop-Params", T_LIST(T_STRING()), null, true, "The service stop parameters (default: none, Windows only)"); // TODO Test
-	private static final String PROP_STOP_TIMEOUT = "capsule.daemon.stopTimeout"; // TODO Test
-	private static final Map.Entry<String, Long> ATTR_STOP_TIMEOUT = ATTRIBUTE("Daemon-Stop-Timeout", T_LONG(), null, true, "Service stop timeout in seconds (default: none, Windows only)"); // TODO Test
-	private static final String PROP_LOG_PATH = "capsule.daemon.logPath"; // TODO Test
-	private static final Map.Entry<String, String> ATTR_LOG_PATH = ATTRIBUTE("Daemon-Log-Path", T_STRING(), null, true, "The log path (default: %SystemRoot%\\System32\\LogFiles\\Apache, Windows only)"); // TODO Test
-	private static final String PROP_LOG_PREFIX = "capsule.daemon.logPrefix"; // TODO Test
-	private static final Map.Entry<String, String> ATTR_LOG_PREFIX = ATTRIBUTE("Daemon-Log-Prefix", T_STRING(), null, true, "The log prefix (default: app ID, Windows only)"); // TODO Test
-	private static final String PROP_LOG_LEVEL = "capsule.daemon.logLevel"; // TODO Test
-	private static final Map.Entry<String, String> ATTR_LOG_LEVEL = ATTRIBUTE("Daemon-Log-Level", T_STRING(), null, true, "The log level between 'error', 'info', 'warn' and 'debug' (default: info, Windows only)"); // TODO Test
+	private static final String PROP_PASSWORD = "capsule.daemon.password";
+	private static final Map.Entry<String, String> ATTR_PASSWORD = ATTRIBUTE("Daemon-Password", T_STRING(), null, true, "The password of the user under which the service will run (default: none, Windows only)");
+	private static final String PROP_JAVA_EXEC_USER = "capsule.daemon.javaExecUser";
+	private static final Map.Entry<String, String> ATTR_JAVA_EXEC_USER = ATTRIBUTE("Daemon-Java-Exec-User", T_STRING(), null, true, "The password of the user that will execute the final Java process (default: none, Windows only)");
+	private static final String PROP_JAVA_EXEC_PASSWORD = "capsule.daemon.javaExecPassword";
+	private static final Map.Entry<String, String> ATTR_JAVA_EXEC_PASSWORD = ATTRIBUTE("Daemon-Java-Exec-Password", T_STRING(), null, true, "The password of the user that will execute the final Java process (default: none, Windows only)");
+	private static final String PROP_SERVICE_NAME = "capsule.daemon.serviceName";
+	private static final Map.Entry<String, String> ATTR_SERVICE_NAME = ATTRIBUTE("Daemon-Service-Name", T_STRING(), null, true, "The service internal name (default: app ID, Windows only)");
+	private static final String PROP_DISPLAY_NAME = "capsule.daemon.displayName";
+	private static final Map.Entry<String, String> ATTR_DISPLAY_NAME = ATTRIBUTE("Daemon-Display-Name", T_STRING(), null, true, "The service display name (default: app ID, Windows only)");
+	private static final String PROP_DESCRIPTION = "capsule.daemon.description";
+	private static final Map.Entry<String, String> ATTR_DESCRIPTION = ATTRIBUTE("Daemon-Description", T_STRING(), null, true, "The service description (default: app ID, Windows only)");
+	private static final String PROP_STARTUP = "capsule.daemon.startup";
+	private static final Map.Entry<String, String> ATTR_STARTUP = ATTRIBUTE("Daemon-Startup", T_STRING(), null, true, "The service startup mode, either 'auto' or 'manual' (default: manual, Windows only)");
+	private static final String PROP_TYPE = "capsule.daemon.type";
+	private static final Map.Entry<String, String> ATTR_TYPE = ATTRIBUTE("Daemon-Type", T_STRING(), null, true, "The service type, it can be 'interactive' (default: none, Windows only)");
+	private static final String PROP_DEPENDS_ON = "capsule.daemon.dependsOn";
+	private static final Map.Entry<String, List<String>> ATTR_DEPENDS_ON = ATTRIBUTE("Daemon-Depends-On", T_LIST(T_STRING()), null, true, "The service dependencies, as a list (default: none, Windows only)");
+	private static final String PROP_STOP_PARAMS = "capsule.daemon.stopParams";
+	private static final Map.Entry<String, List<String>> ATTR_STOP_PARAMS = ATTRIBUTE("Daemon-Stop-Params", T_LIST(T_STRING()), null, true, "The service stop parameters (default: none, Windows only)");
+	private static final String PROP_STOP_TIMEOUT = "capsule.daemon.stopTimeout";
+	private static final Map.Entry<String, Long> ATTR_STOP_TIMEOUT = ATTRIBUTE("Daemon-Stop-Timeout", T_LONG(), null, true, "Service stop timeout in seconds (default: none, Windows only)");
+	private static final String PROP_LOG_PATH = "capsule.daemon.logPath";
+	private static final Map.Entry<String, String> ATTR_LOG_PATH = ATTRIBUTE("Daemon-Log-Path", T_STRING(), null, true, "The log path (default: %SystemRoot%\\System32\\LogFiles\\Apache, Windows only)");
+	private static final String PROP_LOG_PREFIX = "capsule.daemon.logPrefix";
+	private static final Map.Entry<String, String> ATTR_LOG_PREFIX = ATTRIBUTE("Daemon-Log-Prefix", T_STRING(), null, true, "The log prefix (default: app ID, Windows only)");
+	private static final String PROP_LOG_LEVEL = "capsule.daemon.logLevel";
+	private static final Map.Entry<String, String> ATTR_LOG_LEVEL = ATTRIBUTE("Daemon-Log-Level", T_STRING(), null, true, "The log level between 'error', 'info', 'warn' and 'debug' (default: info, Windows only)");
 
 	// Unix only
-	private static final String PROP_CHECK_ONLY = "capsule.daemon.checkOnly"; // TODO Test
+	private static final String PROP_CHECK_ONLY = "capsule.daemon.checkOnly";
 	private static final String PROP_DEBUG = "capsule.daemon.debug";
-	private static final String PROP_VERBOSE = "capsule.daemon.verbose"; // TODO Test
+	private static final String PROP_VERBOSE = "capsule.daemon.verbose";
 
-	private static final Map.Entry<String, String> ATTR_INIT_CLASS = ATTRIBUTE("Init-Class", T_STRING(), null, true, "Class containing the init method (default: none, Unix only)");  // TODO Test
-	private static final Map.Entry<String, String> ATTR_INIT_METHOD = ATTRIBUTE("Init-Method", T_STRING(), null, true, "Static 'String[] -> String[]' service initialization method short name run as 'root'; the return value will be passed to the 'Start' method (default: none, Unix only)");  // TODO Test
-	private static final Map.Entry<String, String> ATTR_DESTROY_CLASS = ATTRIBUTE("Destroy-Class", T_STRING(), null, true, "Class containing the destroy method (default: none, Unix only)"); // TODO Test
-	private static final Map.Entry<String, String> ATTR_DESTROY_METHOD = ATTRIBUTE("Destroy-Method", T_STRING(), null, true, "Static service cleanup method short name run as 'root' (default: none, Unix only)"); // TODO Test
-	private static final String PROP_NO_DETACH = "capsule.daemon.noDetach"; // TODO Test
-	private static final Map.Entry<String, Boolean> ATTR_NO_DETACH = ATTRIBUTE("No-Detach", T_BOOL(), false, true, "Don't detach from parent process (default: false, Unix only)"); // TODO Test
-	private static final String PROP_KEEP_STDIN = "capsule.daemon.keepStdin"; // TODO Test
-	private static final Map.Entry<String, Boolean> ATTR_KEEP_STDIN = ATTRIBUTE("Keep-Stdin", T_BOOL(), false, true, "Don't redirect stdin to /dev/null (default: false, Unix only)"); // TODO Test
-	private static final String PROP_WAIT_SECS = "capsule.daemon.waitSecs"; // TODO Test
-	private static final Map.Entry<String, Long> ATTR_WAIT_SECS = ATTRIBUTE("Wait-Secs", T_LONG(), null, true, "Wait seconds for service, must be multiple of 10 (default: 10 secs, Unix only)"); // TODO Test
+	private static final Map.Entry<String, String> ATTR_INIT_CLASS = ATTRIBUTE("Init-Class", T_STRING(), null, true, "Class containing the init method (default: none, Unix only)");
+	private static final Map.Entry<String, String> ATTR_INIT_METHOD = ATTRIBUTE("Init-Method", T_STRING(), null, true, "Static 'String[] -> String[]' service initialization method short name run as 'root'; the return value will be passed to the 'Start' method (default: none, Unix only)");
+	private static final Map.Entry<String, String> ATTR_DESTROY_CLASS = ATTRIBUTE("Destroy-Class", T_STRING(), null, true, "Class containing the destroy method (default: none, Unix only)");
+	private static final Map.Entry<String, String> ATTR_DESTROY_METHOD = ATTRIBUTE("Destroy-Method", T_STRING(), null, true, "Static service cleanup method short name run as 'root' (default: none, Unix only)");
+	private static final String PROP_NO_DETACH = "capsule.daemon.noDetach";
+	private static final Map.Entry<String, Boolean> ATTR_NO_DETACH = ATTRIBUTE("No-Detach", T_BOOL(), false, true, "Don't detach from parent process (default: false, Unix only)");
+	private static final String PROP_KEEP_STDIN = "capsule.daemon.keepStdin";
+	private static final Map.Entry<String, Boolean> ATTR_KEEP_STDIN = ATTRIBUTE("Keep-Stdin", T_BOOL(), false, true, "Don't redirect stdin to /dev/null (default: false, Unix only)");
+	private static final String PROP_WAIT_SECS = "capsule.daemon.waitSecs";
+	private static final Map.Entry<String, Long> ATTR_WAIT_SECS = ATTRIBUTE("Wait-Secs", T_LONG(), null, true, "Wait seconds for service, must be multiple of 10 (default: 10 secs, Unix only)");
 	//</editor-fold>
 
 	private static Path hostAbsoluteOwnJarFile;
