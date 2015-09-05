@@ -213,48 +213,46 @@ public class DaemonCapsule extends Capsule {
 		int i = installCmd.size();
 
 		installCmd.add(i++, "--JavaHome");
-		installCmd.add(i++, getJavaHome().toAbsolutePath().normalize().toString());
+		installCmd.add(i++, doubleQuote(getJavaHome().toAbsolutePath().normalize().toString()));
 
 		// Add attrs
 		installCmd.add(i++, "--Description");
 		final String desc = getPropertyOrAttributeString(PROP_DESCRIPTION, ATTR_DESCRIPTION);
-		installCmd.add(i++, desc != null ? desc : getAppId());
+		installCmd.add(i++, doubleQuote(desc != null ? desc : getAppId()));
 
 		installCmd.add(i++, "--DisplayName");
 		final String dName = getPropertyOrAttributeString(PROP_DISPLAY_NAME, ATTR_DISPLAY_NAME);
-		installCmd.add(i++, dName != null ? dName : getAppId());
+		installCmd.add(i++, doubleQuote(dName != null ? dName : getAppId()));
 
-		i = addPropertyOrAttributeStringAsOption(installCmd, PROP_STARTUP, ATTR_STARTUP, "--Startup", i);
-		i = addPropertyOrAttributeStringAsOption(installCmd, PROP_TYPE, ATTR_TYPE, "--Type", i);
+		i = addPropertyOrAttributeStringAsOptionDoubleQuote(installCmd, PROP_STARTUP, ATTR_STARTUP, "--Startup", i);
+		i = addPropertyOrAttributeStringAsOptionDoubleQuote(installCmd, PROP_TYPE, ATTR_TYPE, "--Type", i);
 
-		// TODO mangle http://commons.apache.org/proper/commons-daemon/procrun.html
 		final List<String> dependsOn = getPropertyOrAttributeStringList(PROP_DEPENDS_ON, ATTR_DEPENDS_ON);
 		if (dependsOn != null && !dependsOn.isEmpty()) {
 			installCmd.add(i++, "++DependsOn");
-			installCmd.add(i++, join(dependsOn, ";"));
+			installCmd.add(i++, doubleQuote(join(dependsOn, ";", "'")));
 		}
 
 		// Add env
-		// TODO mangle http://commons.apache.org/proper/commons-daemon/procrun.html
 		if (env != null && !env.isEmpty()) {
 			final ArrayList<String> envL = new ArrayList<>();
 			for (final String e : env.keySet())
 				envL.add(e + "=" + env.get(e));
 			if (!envL.isEmpty()) {
 				installCmd.add(i++, "++Environment");
-				installCmd.add(i++, join(envL, ";"));
+				installCmd.add(i++, doubleQuote(join(envL, ";", "'")));
 			}
 		}
 
-		i = addPropertyOrAttributeStringAsOption(installCmd, PROP_JAVA_EXEC_USER, ATTR_JAVA_EXEC_USER, "--User", i);
-		i = addPropertyOrAttributeStringAsOption(installCmd, PROP_JAVA_EXEC_PASSWORD, ATTR_JAVA_EXEC_PASSWORD, "--Password", i);
-		i = addPropertyOrAttributeStringAsOption(installCmd, PROP_USER, ATTR_USER, "--ServiceUser", i);
-		i = addPropertyOrAttributeStringAsOption(installCmd, PROP_PASSWORD, ATTR_PASSWORD, "--ServicePassword", i);
+		i = addPropertyOrAttributeStringAsOptionDoubleQuote(installCmd, PROP_JAVA_EXEC_USER, ATTR_JAVA_EXEC_USER, "--User", i);
+		i = addPropertyOrAttributeStringAsOptionDoubleQuote(installCmd, PROP_JAVA_EXEC_PASSWORD, ATTR_JAVA_EXEC_PASSWORD, "--Password", i);
+		i = addPropertyOrAttributeStringAsOptionDoubleQuote(installCmd, PROP_USER, ATTR_USER, "--ServiceUser", i);
+		i = addPropertyOrAttributeStringAsOptionDoubleQuote(installCmd, PROP_PASSWORD, ATTR_PASSWORD, "--ServicePassword", i);
 
 		installCmd.add(i++, "--StartMode");
 		installCmd.add(i++, "Java");
 
-		i = addPropertyOrAttributeStringAsOption(installCmd, PROP_CWD, ATTR_CWD, "--StartPath", i);
+		i = addPropertyOrAttributeStringAsOptionDoubleQuote(installCmd, PROP_CWD, ATTR_CWD, "--StartPath", i);
 
 		// Not using DaemonAdapter, not needed for Windows
 
@@ -268,16 +266,15 @@ public class DaemonCapsule extends Capsule {
 			installCmd.add(i++, startM);
 		}
 
-		// TODO mangle http://commons.apache.org/proper/commons-daemon/procrun.html
 		if (!appOpts.isEmpty()) {
 			installCmd.add(i++, "++StartParams");
-			installCmd.add(i++, join(appOpts, ";"));
+			installCmd.add(i++, doubleQuote(join(appOpts, ";", "'")));
 		}
 
 		installCmd.add(i++, "--StopMode");
 		installCmd.add(i++, "Java");
 
-		i = addPropertyOrAttributeStringAsOption(installCmd, PROP_CWD, ATTR_CWD, "--StopPath", i);
+		i = addPropertyOrAttributeStringAsOptionDoubleQuote(installCmd, PROP_CWD, ATTR_CWD, "--StopPath", i);
 
 		final String stopC = getAttribute(ATTR_STOP_CLASS);
 		if (stopC != null) {
@@ -291,11 +288,10 @@ public class DaemonCapsule extends Capsule {
 			installCmd.add(i++, stopM);
 		}
 
-		// TODO mangle http://commons.apache.org/proper/commons-daemon/procrun.html
 		final List<String> stopParams = getPropertyOrAttributeStringList(PROP_STOP_PARAMS, ATTR_STOP_PARAMS);
 		if (stopParams != null && !stopParams.isEmpty()) {
 			installCmd.add(i++, "++StopParams");
-			installCmd.add(i++, join(stopParams, ";"));
+			installCmd.add(i++, doubleQuote(join(stopParams, ";", "'")));
 		}
 
 		final Long stopTimeout = getPropertyOrAttributeLong(PROP_STOP_TIMEOUT, ATTR_STOP_TIMEOUT);
@@ -304,33 +300,33 @@ public class DaemonCapsule extends Capsule {
 			installCmd.add(i++, stopTimeout.toString());
 		}
 
-		i = addPropertyOrAttributeStringAsOption(installCmd, PROP_LOG_PATH, ATTR_LOG_PATH, "--LogPath", i);
+		i = addPropertyOrAttributeStringAsOptionDoubleQuote(installCmd, PROP_LOG_PATH, ATTR_LOG_PATH, "--LogPath", i);
 
 		installCmd.add(i++, "--LogPrefix");
 		final String logPrefix = getPropertyOrAttributeString(PROP_LOG_PREFIX, ATTR_LOG_PREFIX);
-		installCmd.add(i++, logPrefix != null ? logPrefix : getAppId());
+		installCmd.add(i++, doubleQuote(logPrefix != null ? logPrefix : getAppId()));
 
 		i = addPropertyOrAttributeStringAsOption(installCmd, PROP_LOG_LEVEL, ATTR_LOG_LEVEL, "--LogLevel", i);
 
 		installCmd.add(i++, "--StdOutput");
 		final String stdout = getPropertyOrAttributeString(PROP_STDOUT_FILE, ATTR_STDOUT_FILE);
-		installCmd.add(i++, stdout != null ? stdout : "auto");
+		installCmd.add(i++, doubleQuote(stdout != null ? stdout : "auto"));
 
 		installCmd.add(i++, "--StdError");
 		final String stderr = getPropertyOrAttributeString(PROP_STDERR_FILE, ATTR_STDERR_FILE);
-		installCmd.add(i++, stderr != null ? stderr : "auto");
+		installCmd.add(i++, doubleQuote(stderr != null ? stderr : "auto"));
 
 		installCmd.add(i++, "--PidFile");
 		final String pid = getPropertyOrAttributeString(PROP_PID_FILE, ATTR_PID_FILE);
-		installCmd.add(i++, pid != null ? pid : getAppId() + ".pid");
+		installCmd.add(i++, doubleQuote(pid != null ? pid : getAppId() + ".pid"));
 
-		// TODO mangle http://commons.apache.org/proper/commons-daemon/procrun.html
 		installCmd.add(i++, "++JvmOptions");
-		installCmd.add(i, join(jvmOpts, ";"));
+		installCmd.add(i, doubleQuote(join(jvmOpts, ";")));
 
 		final String installCmdline = join(installCmd, " ");
 		if (isReinstallNeeded(installCmdline)) {
 			// Write new install cmdline
+			log(LOG_VERBOSE, "Windows: service " + svcName + " commandline has changed, writing in " + getCmdlineFile().toString());
 			dump(installCmdline, getCmdlineFile());
 
 			// Remove old service
@@ -370,13 +366,13 @@ public class DaemonCapsule extends Capsule {
 	private boolean isReinstallNeeded(String cmdLine) throws IOException {
 		// Check if the conf file exists
 		if (!Files.exists(getCmdlineFile())) {
-			log(LOG_VERBOSE, "Service install cmdline file " + getCmdlineFile() + " is not present");
+			log(LOG_VERBOSE, "Windows: service install cmdline file " + getCmdlineFile() + " is not present");
 			return true;
 		}
 
 		// Check if the conf content has changed
 		if (!new String(Files.readAllBytes(getCmdlineFile()), Charset.defaultCharset()).equals(cmdLine)) {
-			log(LOG_VERBOSE, "Service install cmdline file content " + getCmdlineFile() + " has changed");
+			log(LOG_VERBOSE, "Windows: service install cmdline file content " + getCmdlineFile() + " has changed");
 			return true;
 		}
 
@@ -393,7 +389,7 @@ public class DaemonCapsule extends Capsule {
 
 			final boolean buildNeeded = confTime.compareTo(jarTime) < 0;
 			if (buildNeeded)
-				log(LOG_VERBOSE, "Application " + getJarFile() + " has changed");
+				log(LOG_VERBOSE, "Windows: application " + getJarFile() + " has changed");
 			return buildNeeded;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -420,6 +416,15 @@ public class DaemonCapsule extends Capsule {
 		return pos;
 	}
 
+	private int addPropertyOrAttributeStringAsOptionDoubleQuote(List<String> outCmd, String prop, Map.Entry<String, String> attr, String opt, int pos) {
+		final String v = getPropertyOrAttributeString(prop, attr);
+		if (v != null) {
+			outCmd.add(pos++, opt);
+			outCmd.add(pos++, doubleQuote(v));
+		}
+		return pos;
+	}
+
 	private int addAttributeStringAsProperty(List<String> outCmd, Map.Entry<String, String> inAttr, String outPropKey, int pos) {
 		final String v = getAttribute(inAttr);
 		if (v != null)
@@ -433,7 +438,7 @@ public class DaemonCapsule extends Capsule {
 		for (final String c : cmds.subList(1, cmds.size())) { // Skip actual command
 			if (addToCmdOpts) {
 				addToCmdOpts = false;
-				outCmdOpts.add(c);
+				outCmdOpts.add(doubleQuote(c));
 			}
 			else if ("-cp".equals(c) || "-classpath".equals(c)) {
 				outCmdOpts.add("--Classpath");
@@ -447,10 +452,9 @@ public class DaemonCapsule extends Capsule {
 				outJvmOpts.add("--JvmSs");
 			else if (c.startsWith("-Djava.library.path=")) {
 				outCmdOpts.add("--LibraryPath");
-				outCmdOpts.add(c.substring("-Djava.library.path=".length()));
+				outCmdOpts.add(doubleQuote(c.substring("-Djava.library.path=".length())));
 			}
 			else if (c.startsWith("-D") || c.startsWith("-X")
-				// TODO check if they are supported by procrun
 				|| "-server".equals(c) || "-client".equals(c) || "-d32".equals(c) || "-d64".equals(c)
 				|| "-?".equals(c) || "-help".equals(c) || "-showversion".equals(c)
 				|| "-esa".equals(c) || "-dsa".equals(c) || "-enablesystemassertions".equals(c) || "-disablesystemassertions".equals(c)
@@ -459,12 +463,11 @@ public class DaemonCapsule extends Capsule {
 				|| c.startsWith("-version") || c.startsWith("-verbose:") || c.startsWith("-splash:"))
 				otherJvmOpts.add(c);
 			else
-				outAppOpts.add(c);
+				outAppOpts.add(doubleQuote(c));
 		}
-		// TODO mangle http://commons.apache.org/proper/commons-daemon/procrun.html
-		outJvmOpts.add(join(otherJvmOpts, ";"));
+		outJvmOpts.add(join(otherJvmOpts, ";", "'"));
 
-		return outAppOpts.remove(outAppOpts.indexOf(getAttribute(ATTR_APP_CLASS)));
+		return outAppOpts.remove(outAppOpts.indexOf(doubleQuote(getAttribute(ATTR_APP_CLASS))));
 	}
 
 	private List<String> setupUnixCmd(List<String> cmd) {
@@ -613,11 +616,19 @@ public class DaemonCapsule extends Capsule {
 	}
 
 	private static String join(List<String> values, String sep) {
+		return join(values, sep, "", "");
+	}
+
+	private static String join(List<String> values, String sep, String prePostfix) {
+		return join(values, sep, prePostfix, prePostfix);
+	}
+
+	private static String join(List<String> values, String sep, String prefix, String postfix) {
 		final ArrayList<String> vals = values != null ? new ArrayList<>(values) : new ArrayList<String>();
-		final String v0 = vals.size() > 0 ? vals.remove(0) : "";
+		final String v0 = vals.size() > 0 ? (prefix + vals.remove(0) + postfix) : "";
 		final StringBuilder sb = new StringBuilder(v0);
 		for (String v : vals)
-			sb.append(sep).append(v);
+			sb.append(sep).append(prefix).append(v).append(postfix);
 		return sb.toString();
 	}
 
@@ -635,6 +646,10 @@ public class DaemonCapsule extends Capsule {
 		try (final PrintWriter out = new PrintWriter(new OutputStreamWriter(Files.newOutputStream(loc), Charset.defaultCharset()))) {
 			out.print(content);
 		}
+	}
+
+	private static final String doubleQuote(String s) {
+		return "\"" + s.replace("\"", "\\\"") + "\"";
 	}
 	//</editor-fold>
 }
