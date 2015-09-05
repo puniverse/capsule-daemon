@@ -326,7 +326,7 @@ public class DaemonCapsule extends Capsule {
 		final String installCmdline = join(installCmd, " ");
 		if (isReinstallNeeded(installCmdline)) {
 			// Write new install cmdline
-			log(LOG_VERBOSE, "Windows: service " + svcName + " commandline has changed, writing in " + getCmdlineFile().toString());
+			log(LOG_VERBOSE, "Windows: service " + svcName + " needs re-installation, writing cmdline in " + getCmdlineFile().toString());
 			dump(installCmdline, getCmdlineFile());
 
 			// Remove old service
