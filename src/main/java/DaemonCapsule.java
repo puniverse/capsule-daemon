@@ -478,9 +478,9 @@ public class DaemonCapsule extends Capsule {
 		Path javaHome = getJavaHome().toAbsolutePath().normalize();
 		if (isMac() && javaHome.toString().endsWith("/Home/jre"))
 			javaHome = javaHome.getParent();
-		ret.add(i++, javaHome.toString());
+		ret.add(i++, doubleQuote(javaHome.toString()));
 
-		i = addPropertyOrAttributeStringAsOption(ret, PROP_USER, ATTR_USER, "-user", i);
+		i = addPropertyOrAttributeStringAsOptionDoubleQuote(ret, PROP_USER, ATTR_USER, "-user", i);
 
 		if (getPropertyOrAttributeBool(PROP_KEEP_STDIN, ATTR_KEEP_STDIN))
 			ret.add(i++, "-keepstdin");
@@ -504,13 +504,13 @@ public class DaemonCapsule extends Capsule {
 				ret.add(i++, "-verbose:" + verbose);
 		}
 
-		i = addPropertyOrAttributeStringAsOption(ret, PROP_CWD, ATTR_CWD, "-cwd", i);
-		i = addPropertyOrAttributeStringAsOption(ret, PROP_STDOUT_FILE, ATTR_STDOUT_FILE, "-outfile", i);
-		i = addPropertyOrAttributeStringAsOption(ret, PROP_STDERR_FILE, ATTR_STDERR_FILE, "-errfile", i);
+		i = addPropertyOrAttributeStringAsOptionDoubleQuote(ret, PROP_CWD, ATTR_CWD, "-cwd", i);
+		i = addPropertyOrAttributeStringAsOptionDoubleQuote(ret, PROP_STDOUT_FILE, ATTR_STDOUT_FILE, "-outfile", i);
+		i = addPropertyOrAttributeStringAsOptionDoubleQuote(ret, PROP_STDERR_FILE, ATTR_STDERR_FILE, "-errfile", i);
 
 		ret.add(i++, "-pidfile");
 		final String pid = getPropertyOrAttributeString(PROP_PID_FILE, ATTR_PID_FILE);
-		ret.add(i++, pid != null ? pid : "/var/run/" + getAppId() + ".pid");
+		ret.add(i++, pid != null ? doubleQuote(pid) : doubleQuote("/var/run/" + getAppId() + ".pid"));
 
 		final Long wait = getPropertyOrAttributeLong(PROP_WAIT_SECS, ATTR_WAIT_SECS);
 		if (wait != null) {
