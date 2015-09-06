@@ -131,6 +131,8 @@ public class DaemonCapsule extends Capsule {
 			cp.add(findOwnJarFile().toAbsolutePath().normalize());
 			return (T) cp;
 		}
+//		if (ATTR_APP_CLASS == attr)
+//			return (T) DaemonAdapter.class.getName();
 		return super.attribute(attr);
 	}
 
@@ -555,7 +557,6 @@ public class DaemonCapsule extends Capsule {
 			return getAttribute(attr);
 		return Arrays.asList(propValue.split(";"));
 	}
-
 
 	private Boolean getPropertyOrAttributeBool(String propName, Map.Entry<String, Boolean> attr) {
 		final String propValue = System.getProperty(propName);
