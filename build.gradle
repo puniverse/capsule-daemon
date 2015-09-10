@@ -11,7 +11,7 @@ targetCompatibility = '1.7'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 group       = "co.paralleluniverse"
-version     = "0.1.0-SNAPSHOT"
+version     = "0.1.0"
 status      = "integration"
 description = "Daemon/Service Caplet based on jsvc and procrun"
 ext.url             = "https://github.com/puniverse/${project.name}"
@@ -37,7 +37,7 @@ repositories {
 }
 
 dependencies {
-    compile 'co.paralleluniverse:capsule:1.0-rc2-SNAPSHOT'
+    compile 'co.paralleluniverse:capsule:1.0'
     runtime 'commons-daemon:commons-daemon:1.0.15'
     testCompile group: 'junit', name: 'junit', version: '4.10'
 }
