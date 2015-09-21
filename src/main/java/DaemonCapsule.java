@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.jar.JarInputStream;
+import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -104,7 +106,9 @@ public class DaemonCapsule extends Capsule {
 
 	private static Path hostAbsoluteOwnJarFile;
 	private static Path svcExec;
+
 	private Map<String, String> env;
+	private String appClass;
 
 	public DaemonCapsule(Capsule pred) {
 		super(pred);
@@ -474,7 +478,7 @@ public class DaemonCapsule extends Capsule {
 		}
 		outJvmOpts.add(join(otherJvmOpts, ";", "'"));
 
-		return outAppOpts.remove(outAppOpts.indexOf(doubleQuote(getAttribute(ATTR_APP_CLASS))));
+		return outAppOpts.remove(outAppOpts.indexOf(doubleQuote(getAppClass())));
 	}
 
 	private List<String> setupUnixCmd(List<String> cmd) {
@@ -530,7 +534,7 @@ public class DaemonCapsule extends Capsule {
 
 		// TODO Not nicest but redefining ATTR_APP_CLASS seems to break a lot of stuff
 		final String startC = getAttribute(ATTR_START_CLASS);
-		final int appClassIdx = ret.indexOf(getAttribute(ATTR_APP_CLASS));
+		final int appClassIdx = ret.indexOf(getAppClass());
 		final String appClass = ret.remove(appClassIdx);
 		ret.add(appClassIdx, DaemonAdapter.class.getName());
 		ret.add(i++, "-D" + DaemonAdapter.PROP_START_CLASS + "=" + (startC != null ? startC : appClass));
@@ -597,6 +601,21 @@ public class DaemonCapsule extends Capsule {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private String getAppClass() {
+		if (appClass == null) {
+			if (hasAttribute(ATTR_APP_CLASS))
+				appClass = getAttribute(ATTR_APP_CLASS);
+			else if (hasAttribute(ATTR_APP_ARTIFACT)) {
+				final List<Path> appArtifactPaths = resolve(lookup(getAttribute(ATTR_APP_ARTIFACT)));
+				if (appArtifactPaths.size() <= 0)
+					throw new IllegalStateException("Can't figure out the application's main class: resolving 'Application' yields " + appArtifactPaths.size() + " artifacts, need at least one");
+				appClass = getMainClass(appArtifactPaths.get(0));
+			} else
+				throw new IllegalStateException("Can't figure out the application's main class: nor 'Application-Class' neither 'Application' have been found");
+		}
+		return appClass;
 	}
 
 	private static Path findOwnJarFile() {
@@ -676,5 +695,61 @@ public class DaemonCapsule extends Capsule {
 		final Matcher m = CAPSULE_PORT_PATTERN.matcher(s);
 		return m.replaceFirst("");
 	}
+
+	//</editor-fold>
+
+	//<editor-fold default-state="collapsed" desc="TODO factor out with Capsule">
+	private static final String ATTR_MAIN_CLASS = "Main-Class";
+
+	private static String getMainClass(Path jar) {
+		return getMainClass(getManifest(jar));
+	}
+
+	private static String getMainClass(Manifest manifest) {
+		if (manifest == null)
+			return null;
+		return manifest.getMainAttributes().getValue(ATTR_MAIN_CLASS);
+	}
+
+	private static Manifest getManifest(Path jar) {
+		try (JarInputStream jis = openJarInputStream(jar)) {
+			return jis.getManifest();
+		} catch (IOException e) {
+			throw new RuntimeException("Error reading manifest from " + jar, e);
+		}
+	}
+
+	private static JarInputStream openJarInputStream(Path jar) throws IOException {
+		return new JarInputStream(skipToZipStart(Files.newInputStream(jar), null));
+	}
+
+	private static final int[] ZIP_HEADER = new int[]{'P', 'K', 0x03, 0x04};
+
+	private static InputStream skipToZipStart(InputStream is, OutputStream os) throws IOException {
+		if (!is.markSupported())
+			is = new BufferedInputStream(is);
+		int state = 0;
+		for (;;) {
+			if (state == 0)
+				is.mark(ZIP_HEADER.length);
+			final int b = is.read();
+			if (b < 0)
+				throw new IllegalArgumentException("Not a JAR/ZIP file");
+			if (state >= 0 && b == ZIP_HEADER[state]) {
+				state++;
+				if (state == ZIP_HEADER.length)
+					break;
+			} else {
+				state = -1;
+				if (b == '\n' || b == 0) // start matching on \n and \0
+					state = 0;
+			}
+			if (os != null)
+				os.write(b);
+		}
+		is.reset();
+		return is;
+	}
+
 	//</editor-fold>
 }
