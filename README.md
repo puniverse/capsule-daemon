@@ -68,7 +68,8 @@ The following additional manifest entries and system properties can be used to c
 
 ## Notes
 
-Launch, Java and service execution users must all be able to access the same Capsule's cache directory. You can set it to a commonly accessible location (for example in `/tmp/capsule`) through the `CAPSULE_CACHE_DIR` environment variable.
+* `jsvc` with default settings (due to the default PID file location) and `procrun` in any case (for service installation, uninstallation and upgrade) require resp. `root` and administrative privileges.
+* Launch, Java and service execution users must all be able to access the same Capsule's cache directory. You can set it to a commonly accessible location (for example in `/tmp/capsule`) through the `CAPSULE_CACHE_DIR` environment variable.
 
 ## License
 
