@@ -165,24 +165,39 @@ public class DaemonCapsule extends Capsule {
 
 	//<editor-fold defaultstate="collapsed" desc="Utils">
 	private Path setupBinDir() {
-		final Path libdir = findOwnJarFile().toAbsolutePath().getParent().resolve("bin");
-		try {
-			final String[] ress =  new String[] {
-				"jsvc/linux64-brew/jsvc",
-				"jsvc/macosx-yosemite-brew/jsvc",
-				"procrun/prunsrv.exe",
-			};
-			log(LOG_VERBOSE, "Copying daemon native helpers " + Arrays.toString(ress) + " in " + libdir.toAbsolutePath().normalize().toString());
-			if (Files.exists(libdir))
+		final Path libdir = binDir();
+		final String[] ress =  new String[] {
+			"jsvc/linux64-brew/jsvc",
+			"jsvc/macosx-yosemite-brew/jsvc",
+			"procrun/prunsrv.exe",
+			"procrun/x64/prunsrv.exe",
+		};
+		log(LOG_VERBOSE, "Copying daemon native helpers " + Arrays.toString(ress) + " in " + libdir.toAbsolutePath().normalize().toString());
+		if (Files.exists(libdir)) {
+			try {
 				delete(libdir);
+			} catch (IOException e) {
+				log(LOG_VERBOSE, "WARNING: Could not delete jsvc/procrun executables: " + e.getMessage());
+			}
+		}
+		try {
 			addTempFile(Files.createDirectory(libdir));
-
-			for (final String filename : ress)
-				copy(filename, "bin", libdir);
 		} catch (IOException e) {
-			log(LOG_VERBOSE, "WARNING: Could not extract jsvc/procrun executables: " + e.getMessage());
+			log(LOG_VERBOSE, "WARNING: Could not create jsvc/procrun executables: " + e.getMessage());
+		}
+
+		for (final String filename : ress) {
+			try {
+				copy(filename, "bin", libdir);
+			} catch (IOException e) {
+				log(LOG_VERBOSE, "WARNING: Could not copy jsvc/procrun executables: " + e.getMessage());
+			}
 		}
 		return libdir;
+	}
+
+	private Path binDir() {
+		return findOwnJarFile().toAbsolutePath().getParent().resolve("bin");
 	}
 
 	private static Path copy(String filename, String resourceDir, Path targetDir, OpenOption... opts) throws IOException {
@@ -217,7 +232,7 @@ public class DaemonCapsule extends Capsule {
 	private List<String> stopWindowsCmd() throws IOException {
 		final List<String> ret = new ArrayList<>();
 
-		ret.add(doubleQuote(svcExec.toString()));
+		ret.add(doubleQuote(binDir().resolve(platformExecPath(true)).toString()));
 
 		ret.add("stop");
 
@@ -629,10 +644,18 @@ public class DaemonCapsule extends Capsule {
 	}
 
 	private Path platformExecPath() {
+		return platformExecPath(false);
+	}
+
+	private Path platformExecPath(boolean stop) {
 		if (isMac())
 			return Paths.get("jsvc", "macosx-yosemite-brew", "jsvc");
-		if (isWindows())
-			return Paths.get("procrun", "prunsrv.exe");
+		if (isWindows()) {
+			if (!stop && is64bit())
+				return Paths.get("procrun", "x64", "prunsrv.exe");
+			else
+				return Paths.get("procrun", "prunsrv.exe");
+		}
 		if (isLinux64()) {
 			return Paths.get("jsvc", "linux64-brew", "jsvc");
 		}
@@ -641,6 +664,13 @@ public class DaemonCapsule extends Capsule {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private static boolean is64bit() {
+		if (System.getProperty("os.name").toLowerCase().contains("windows"))
+			return (System.getenv("ProgramFiles(x86)") != null);
+		else
+			return (System.getProperty("os.arch").contains("64"));
 	}
 
 	private String getAppClass() {
