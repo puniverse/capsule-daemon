@@ -57,6 +57,8 @@ public class DaemonCapsule extends Capsule {
 	private static final String PROP_PID_FILE = "capsule.daemon.pidFile";
 	private static final Map.Entry<String, String> ATTR_PID_FILE = ATTRIBUTE("Daemon-PID-File", T_STRING(), null, true, "PID file (default: /var/run/<appid>.pid on Unix, <logpath>/<appid>.pid on Windows)");
 
+	private static final String PROP_STOP = "capsule.daemon.stop";
+
 	// Windows only
 	private static final String PROP_PASSWORD = "capsule.daemon.password";
 	private static final Map.Entry<String, String> ATTR_PASSWORD = ATTRIBUTE("Daemon-Password", T_STRING(), null, true, "The password of the user under which the service will run (default: none, Windows only)");
@@ -145,11 +147,15 @@ public class DaemonCapsule extends Capsule {
 		final ProcessBuilder pb = super.prelaunch(jvmArgs, args);
 		final List<String> svcCmd;
 		try {
-			svcCmd = toSvc(pb.command());
+			svcCmd = isStop() ? toSvcStop(pb.command()) : toSvc(pb.command());
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
 		return new ProcessBuilder(svcCmd);
+	}
+
+	private boolean isStop() {
+		return emptyOrTrue(System.getProperty(PROP_STOP));
 	}
 
 	@Override
@@ -194,11 +200,33 @@ public class DaemonCapsule extends Capsule {
 		}
 	}
 
+	private List<String> toSvcStop(List<String> command) throws IOException {
+		if (isWindows())
+			return stopWindowsCmd();
+		else
+			return setupUnixCmd(command, true);
+	}
+
 	private List<String> toSvc(List<String> cmd) throws IOException {
 		if (isWindows())
 			return setupWindowsCmd(cmd);
 		else
 			return setupUnixCmd(cmd);
+	}
+
+	private List<String> stopWindowsCmd() throws IOException {
+		final List<String> ret = new ArrayList<>();
+
+		ret.add(doubleQuote(svcExec.toString()));
+
+		ret.add("stop");
+
+		String svcName = getPropertyOrAttributeString(PROP_SERVICE_NAME, ATTR_SERVICE_NAME);
+		if (svcName == null)
+			svcName = getAppId();
+		ret.add(doubleQuote(svcName));
+
+		return ret;
 	}
 
 	private List<String> setupWindowsCmd(List<String> cmd) throws IOException {
@@ -482,6 +510,10 @@ public class DaemonCapsule extends Capsule {
 	}
 
 	private List<String> setupUnixCmd(List<String> cmd) {
+		return setupUnixCmd(cmd, false);
+	}
+
+	private List<String> setupUnixCmd(List<String> cmd, boolean stop) {
 		final List<String> ret = new ArrayList<>(cmd);
 
 		int i = 1;
@@ -493,10 +525,10 @@ public class DaemonCapsule extends Capsule {
 
 		i = addPropertyOrAttributeStringAsOption(ret, PROP_USER, ATTR_USER, "-user", i);
 
-		if (getPropertyOrAttributeBool(PROP_KEEP_STDIN, ATTR_KEEP_STDIN))
+		if (!stop && getPropertyOrAttributeBool(PROP_KEEP_STDIN, ATTR_KEEP_STDIN))
 			ret.add(i++, "-keepstdin");
 
-		if (getPropertyOrAttributeBool(PROP_NO_DETACH, ATTR_NO_DETACH))
+		if (!stop && getPropertyOrAttributeBool(PROP_NO_DETACH, ATTR_NO_DETACH))
 			ret.add(i++, "-nodetach");
 
 		final String checkOnly = System.getProperty(PROP_CHECK_ONLY);
@@ -515,24 +547,32 @@ public class DaemonCapsule extends Capsule {
 				ret.add(i++, "-verbose:" + verbose);
 		}
 
-		i = addPropertyOrAttributeStringAsOption(ret, PROP_CWD, ATTR_CWD, "-cwd", i);
-		i = addPropertyOrAttributeStringAsOption(ret, PROP_STDOUT_FILE, ATTR_STDOUT_FILE, "-outfile", i);
-		i = addPropertyOrAttributeStringAsOption(ret, PROP_STDERR_FILE, ATTR_STDERR_FILE, "-errfile", i);
+		if (!stop) {
+			i = addPropertyOrAttributeStringAsOption(ret, PROP_CWD, ATTR_CWD, "-cwd", i);
+			i = addPropertyOrAttributeStringAsOption(ret, PROP_STDOUT_FILE, ATTR_STDOUT_FILE, "-outfile", i);
+			i = addPropertyOrAttributeStringAsOption(ret, PROP_STDERR_FILE, ATTR_STDERR_FILE, "-errfile", i);
+		}
 
 		ret.add(i++, "-pidfile");
 		final String pid = getPropertyOrAttributeString(PROP_PID_FILE, ATTR_PID_FILE);
 		ret.add(i++, pid != null ? pid : "/var/run/" + getAppId() + ".pid");
 
-		final Long wait = getPropertyOrAttributeLong(PROP_WAIT_SECS, ATTR_WAIT_SECS);
-		if (wait != null) {
-			ret.add(i++, "-wait");
-			ret.add(i++, wait.toString());
+		if (stop) {
+			ret.add(i++, "-stop");
+		}
+
+		if (!stop) {
+			final Long wait = getPropertyOrAttributeLong(PROP_WAIT_SECS, ATTR_WAIT_SECS);
+			if (wait != null) {
+				ret.add(i++, "-wait");
+				ret.add(i++, wait.toString());
+			}
 		}
 
 		i = addAttributeStringAsProperty(ret, ATTR_INIT_CLASS, DaemonAdapter.PROP_INIT_CLASS, i);
 		i = addAttributeStringAsProperty(ret, ATTR_INIT_METHOD, DaemonAdapter.PROP_INIT_METHOD, i);
 
-		// TODO Not nicest but redefining ATTR_APP_CLASS seems to break a lot of stuff
+		// TODO Not nicest but redefining ATTR_APP_CLASS seems to break a lot of stuff, see https://github.com/puniverse/capsule/issues/82
 		final String startC = getAttribute(ATTR_START_CLASS);
 		final int appClassIdx = ret.indexOf(getAppClass());
 		final String appClass = ret.remove(appClassIdx);
@@ -700,6 +740,10 @@ public class DaemonCapsule extends Capsule {
 
 	//<editor-fold default-state="collapsed" desc="TODO factor out with Capsule">
 	private static final String ATTR_MAIN_CLASS = "Main-Class";
+
+	private static boolean emptyOrTrue(String value) {
+		return value != null && (value.isEmpty() || Boolean.parseBoolean(value));
+	}
 
 	private static String getMainClass(Path jar) {
 		return getMainClass(getManifest(jar));

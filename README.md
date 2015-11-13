@@ -37,6 +37,8 @@ The following additional manifest entries and system properties can be used to c
      - `Daemon-Stdout-File`: stdout (default: `/dev/null` on Unix, `<logpath>/service-stdout.YEAR-MONTH-DAY.log` on Windows). The `capsule.daemon.stdoutFile` system property can override it.
      - `Daemon-Stderr-File`: stdout (default: `/dev/null` on Unix, `<logpath>/service-stderr.YEAR-MONTH-DAY.log` on Windows). . The `capsule.daemon.stderrFile` system property can override it.
      - `Daemon-PID-File`: PID file (default: `/var/run/<appid>.pid` on Unix, `<logpath>/<appid>.pid` on Windows). The `capsule.daemon.pidFile` system property can override it.
+   - System properties:
+     - `capsule.daemon.stop`: if `true` or barely present will stop a running service rather than starting one.
  - Only Unix:
    - System properties:
      - `capsule.daemon.checkOnly`: `jsvc` check run, won't start the service.
