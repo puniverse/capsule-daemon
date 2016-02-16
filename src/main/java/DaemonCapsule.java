@@ -1,6 +1,6 @@
 /*
  * Capsule
- * Copyright (c) 2015, Parallel Universe Software Co. and Contributors. All rights reserved.
+ * Copyright (c) 2015-2016, Parallel Universe Software Co. and Contributors. All rights reserved.
  *
  * This program and the accompanying materials are licensed under the terms
  * of the Eclipse Public License v1.0, available at
@@ -13,10 +13,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -205,7 +202,7 @@ public class DaemonCapsule extends Capsule {
 			final Path f = targetDir.resolve(filename);
 			Files.createDirectories(f.getParent());
 			try (final OutputStream out = Files.newOutputStream(f, opts)) {
-				copy(in, out);
+				copy0(in, out);
 				final Path ret = targetDir.resolve(filename);
 				//noinspection ResultOfMethodCallIgnored
 				ret.toFile().setExecutable(true);
@@ -825,5 +822,11 @@ public class DaemonCapsule extends Capsule {
 		return is;
 	}
 
+	private static void copy0(InputStream is, OutputStream out) throws IOException {
+		final byte[] buffer = new byte[1024];
+		for (int bytesRead; (bytesRead = is.read(buffer)) != -1;)
+			out.write(buffer, 0, bytesRead);
+		out.flush();
+	}
 	//</editor-fold>
 }
