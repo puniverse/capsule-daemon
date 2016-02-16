@@ -44,6 +44,7 @@ The following additional manifest entries and system properties can be used to c
      - `capsule.daemon.checkOnly`: `jsvc` check run, won't start the service.
      - `capsule.daemon.debug`: turn on debug `jsvc` logging.
      - `capsule.daemon.verbose`: turn on verbose `jsvc` logging.
+     - `capsule.daemon.jsvc`: specifies the pathname of a system-installed `jsvc` command to be used instead of the one provided by `capsule-daemon`.
    - Manifest entries:
      - `Init-Class`: class containing the `init` method (default: none).
      - `Init-Method`: static `String[] -> String[]` service initialization method, it will be run as `root`; the return value will be passed to the `Start` method (default: none).

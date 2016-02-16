@@ -90,6 +90,7 @@ public class DaemonCapsule extends Capsule {
     private static final String PROP_CHECK_ONLY = "capsule.daemon.checkOnly";
     private static final String PROP_DEBUG = "capsule.daemon.debug";
     private static final String PROP_VERBOSE = "capsule.daemon.verbose";
+    private static final String PROP_JSVC = "capsule.daemon.jsvc";
 
     private static final Map.Entry<String, String> ATTR_INIT_CLASS = ATTRIBUTE("Init-Class", T_STRING(), null, true, "Class containing the init method (default: none, Unix only)");
     private static final Map.Entry<String, String> ATTR_INIT_METHOD = ATTRIBUTE("Init-Method", T_STRING(), null, true, "Static 'String[] -> String[]' service initialization method short name run as 'root'; the return value will be passed to the 'Start' method (default: none, Unix only)");
@@ -115,8 +116,14 @@ public class DaemonCapsule extends Capsule {
 
     @Override
     protected Path getJavaExecutable() {
-        if (svcExec == null)
+        if (svcExec == null) {
+            if (isUnix()) {
+                final String systemJsvc = getProperty(PROP_JSVC);
+                if (systemJsvc != null)
+                    return (svcExec = Paths.get(systemJsvc));
+            }
             svcExec = setupBinDir().resolve(platformExecPath()).toAbsolutePath().normalize();
+        }
         return svcExec;
     }
 
