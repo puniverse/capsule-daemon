@@ -164,7 +164,7 @@ public class DaemonCapsule extends Capsule {
     private Path setupBinDir() {
         final Path libdir = binDir();
         final String[] ress = new String[]{
-            "jsvc/linux64-brew/jsvc",
+            "jsvc/linux64/jsvc",
             "jsvc/macosx-yosemite-brew/jsvc",
             "procrun/prunsrv.exe",
             "procrun/x64/prunsrv.exe",
@@ -651,7 +651,7 @@ public class DaemonCapsule extends Capsule {
                 return Paths.get("procrun", "prunsrv.exe");
         }
         if (isLinux64()) {
-            return Paths.get("jsvc", "linux64-brew", "jsvc");
+            return Paths.get("jsvc", "linux64", "jsvc");
         }
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(new ProcessBuilder("which", "jsvc").start().getInputStream(), Charset.defaultCharset()))) {
             return Paths.get(reader.readLine());
