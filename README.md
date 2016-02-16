@@ -57,8 +57,8 @@ The following additional manifest entries and system properties can be used to c
    - `Daemon-Java-Exec-User`: the password of the user that will execute the final Java process (default: none). The `capsule.daemon.javaExecUser` system property can override it.
    - `Daemon-Java-Exec-Password`: the password of the user that will execute the final Java process (default: none). The `capsule.daemon.javaExecPassword` system property can override it.
    - `Daemon-Service-Name`: the service internal name (default: app ID). The `capsule.daemon.serviceName` system property can override it.
-   - `Daemon-Service-Display-Name`: the service display name (default: app ID). The `capsule.daemon.displayName` system property can override it.
-   - `Daemon-Service-Description`: the service description (default: app ID). The `capsule.daemon.description` system property can override it.
+   - `Daemon-Display-Name`: the service display name (default: app ID). The `capsule.daemon.displayName` system property can override it.
+   - `Daemon-Description`: the service description (default: app ID). The `capsule.daemon.description` system property can override it.
    - `Daemon-Startup`: the service startup mode, either `auto` or `manual` (default: `manual`). The `capsule.daemon.startup` system property can override it.
    - `Daemon-Type`: the service type, it can be `interactive (default: none). The `capsule.daemon.type` system property can override it.
    - `Daemon-DependsOn`: the list of service dependencies (default: none). The `capsule.daemon.dependsOn` system property can override it.
