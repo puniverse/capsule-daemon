@@ -32,8 +32,8 @@ The following additional manifest entries and system properties can be used to c
      - `Daemon-Start-Method`: static `String[] -> void` service start method short name run as the specified, if any (default: app's main).
      - `Daemon-Stop-Class`: class containing the `stop` method (default: none).
      - `Daemon-Stop-Method`: static `String[] -> void` service stop method short name run as the specified, if any (default: none).
-     - `Daemon-User`: the username under which the service will run.
-     - `Daemon-Cwd`: working directory of start/stop (default: `/ on Unix). The `capsule.daemon.user` system property can override it. The `capsule.daemon.cwd` system property can override it.
+     - `Daemon-User`: the username under which the service will run. The `capsule.daemon.user` system property can override it.
+     - `Daemon-Cwd`: working directory of start/stop (default: `/` on Unix). The `capsule.daemon.cwd` system property can override it.
      - `Daemon-Stdout-File`: stdout (default: `/dev/null` on Unix, `<logpath>/service-stdout.YEAR-MONTH-DAY.log` on Windows). The `capsule.daemon.stdoutFile` system property can override it.
      - `Daemon-Stderr-File`: stdout (default: `/dev/null` on Unix, `<logpath>/service-stderr.YEAR-MONTH-DAY.log` on Windows). . The `capsule.daemon.stderrFile` system property can override it.
      - `Daemon-PID-File`: PID file (default: `/var/run/<appid>.pid` on Unix, `<logpath>/<appid>.pid` on Windows). The `capsule.daemon.pidFile` system property can override it.
@@ -61,7 +61,7 @@ The following additional manifest entries and system properties can be used to c
    - `Daemon-Display-Name`: the service display name (default: app ID). The `capsule.daemon.displayName` system property can override it.
    - `Daemon-Description`: the service description (default: app ID). The `capsule.daemon.description` system property can override it.
    - `Daemon-Startup`: the service startup mode, either `auto` or `manual` (default: `manual`). The `capsule.daemon.startup` system property can override it.
-   - `Daemon-Type`: the service type, it can be `interactive (default: none). The `capsule.daemon.type` system property can override it.
+   - `Daemon-Type`: the service type, it can be `interactive` (default: none). The `capsule.daemon.type` system property can override it.
    - `Daemon-DependsOn`: the list of service dependencies (default: none). The `capsule.daemon.dependsOn` system property can override it.
    - `Daemon-Stop-Params`: the list of service stop parameters (default: none). The `capsule.daemon.stopParams` system property can override it.
    - `Daemon-Stop-Timeout`: service stop timeout in seconds (default: none). The `capsule.daemon.stopTimeout` system property can override it.
