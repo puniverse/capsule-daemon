@@ -1,6 +1,8 @@
 # Capsule Daemon
 
-A [caplet](https://github.com/puniverse/capsule#what-are-caplets) that runs a [capsule](https://github.com/puniverse/capsule) as a Unix service through [jsvc](http://commons.apache.org/proper/commons-daemon/jsvc.html) and as a Windows service through [procrun](http://commons.apache.org/proper/commons-daemon/procrun.html).
+A [caplet](https://github.com/puniverse/capsule#what-are-caplets) that runs a Java [capsule](https://github.com/puniverse/capsule) as a Unix service through [jsvc](http://commons.apache.org/proper/commons-daemon/jsvc.html) and as a Windows service through [procrun](http://commons.apache.org/proper/commons-daemon/procrun.html).
+
+**NOTE**: currently `capsule-daemon` [doesn't support `Application-Script` capsules](https://github.com/puniverse/capsule-daemon/issues/11).
 
 ## Requirements
 

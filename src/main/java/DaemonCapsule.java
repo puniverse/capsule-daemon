@@ -249,6 +249,9 @@ public class DaemonCapsule extends Capsule {
     }
 
     private List<String> setupWindowsCmd(List<String> cmd) throws IOException {
+        if (svcExec == null)
+            throw new UnsupportedOperationException("At present `capsule-daemon` only supports Java capsules and not `Application-Script` ones");
+
         String svcName = getPropertyOrAttributeString(PROP_SERVICE_NAME, ATTR_SERVICE_NAME);
         if (svcName == null)
             svcName = getAppId();
